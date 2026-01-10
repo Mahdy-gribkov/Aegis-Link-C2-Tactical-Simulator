@@ -1,5 +1,6 @@
 ﻿using AegisLink.App.Services;
 using AegisLink.App.ViewModels;
+using AegisLink.Persistence;
 using System.Windows;
 
 namespace AegisLink.App
@@ -10,6 +11,7 @@ namespace AegisLink.App
     public partial class App : Application
     {
         private UdpLinkService? _udpLinkService;
+        private MissionRepository? _missionRepository;
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -17,7 +19,8 @@ namespace AegisLink.App
 
             // Dependency Injection (Manual Composition Root)
             _udpLinkService = new UdpLinkService();
-            var mainViewModel = new MainViewModel(_udpLinkService);
+            _missionRepository = new MissionRepository();
+            var mainViewModel = new MainViewModel(_udpLinkService, _missionRepository);
 
             var mainWindow = new MainWindow
             {

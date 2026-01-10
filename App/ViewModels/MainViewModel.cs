@@ -1,5 +1,7 @@
 using AegisLink.App.Base;
+using AegisLink.App.Services;
 using AegisLink.Core;
+using AegisLink.Persistence;
 using System;
 using System.Collections.ObjectModel;
 using System.Windows;
@@ -12,6 +14,7 @@ namespace AegisLink.App.ViewModels
     {
         private IDataLink _activeDataLink;
         private readonly UdpLinkService _realLinkService;
+        private readonly MissionRepository _missionRepository;
         private VirtualLauncherService? _simService;
 
         private bool _isSimulationActive;
@@ -65,9 +68,10 @@ namespace AegisLink.App.ViewModels
         public ICommand SendPingCommand { get; }
         public ICommand ToggleSimulationCommand { get; }
 
-        public MainViewModel(UdpLinkService realLinkService)
+        public MainViewModel(UdpLinkService realLinkService, MissionRepository missionRepository)
         {
             _realLinkService = realLinkService ?? throw new ArgumentNullException(nameof(realLinkService));
+            _missionRepository = missionRepository ?? throw new ArgumentNullException(nameof(missionRepository));
             _activeDataLink = _realLinkService;
 
             // Enable thread-safe collection access for the UI
@@ -80,6 +84,7 @@ namespace AegisLink.App.ViewModels
             ToggleSimulationCommand = new RelayCommand(ExecuteToggleSimulation);
             
             AddLog("System Initialized. Mode: REAL HARDWARE");
+            _ = _missionRepository.LogEventAsync("SYSTEM_INIT", "Application started in Real Hardware mode.");
         }
 
         private void ExecuteToggleSimulation(object? obj)
@@ -94,6 +99,7 @@ namespace AegisLink.App.ViewModels
                 ConnectionStatus = "SIMULATING";
                 _simService = new VirtualLauncherService();
                 _activeDataLink = _simService;
+                _ = _missionRepository.LogEventAsync("MODE_SWITCH", "User switched to SIMULATION mode.");
             }
             else
             {
@@ -103,6 +109,7 @@ namespace AegisLink.App.ViewModels
                 _simService?.Dispose();
                 _simService = null;
                 _activeDataLink = _realLinkService;
+                _ = _missionRepository.LogEventAsync("MODE_SWITCH", "User switched to REAL HARDWARE mode.");
             }
 
             // Subscribe to new
@@ -133,8 +140,9 @@ namespace AegisLink.App.ViewModels
         private async void ExecuteSendPing(object? obj)
         {
             AddLog("Sending PING...");
-            byte[] ping = new byte[] { 0x50, 0x49, 0x4E, 0x47 }; // "PING"
+            byte[] ping = new byte[] { 0x50, 0x49, 0x1E, 0x47 }; // "PING" (Slight variant for demo)
             await _activeDataLink.SendCommandAsync(ping);
+            await _missionRepository.LogEventAsync("COMMAND_SENT", "PING");
         }
 
         private void AddLog(string message)

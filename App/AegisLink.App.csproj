@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Core\AegisLink.Core.csproj" />
+    <ProjectReference Include="..\Persistence\AegisLink.Persistence.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

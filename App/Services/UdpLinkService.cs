@@ -39,7 +39,7 @@ namespace AegisLink.App.Services
                 while (!_cts.Token.IsCancellationRequested)
                 {
                     // ReceiveAsync returns the remote endpoint
-                    var result = await _udpClient.ReceiveAsync(_cts.Token);
+                    var result = await _udpClient.ReceiveAsync();
                     byte[] payload = result.Buffer;
                     IPEndPoint remoteEp = result.RemoteEndPoint;
 
