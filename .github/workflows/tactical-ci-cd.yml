@@ -1,68 +1,17 @@
 name: Aegis-Link Tactical CI/CD
-
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
+on: [push, pull_request]
 jobs:
   build-and-test:
     runs-on: windows-latest
-    
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '6.0.x'
-
-    - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v2
-
-    - name: Install WPF Workload
-      run: dotnet workload install wpf
-
-    - name: Restore Dependencies
-      run: dotnet restore AegisLink.sln
-
-    - name: Build Solution
-      run: dotnet build AegisLink.sln --configuration Release --no-restore
-
-    - name: Run Unit Tests
-      run: dotnet test AegisLink.sln --configuration Release --no-build --verbosity normal
-
-  publish-artifact:
-    needs: build-and-test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: windows-latest
-    
-    steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '6.0.x'
-
-    - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v2
-
-    - name: Publish Tactical Release
-      run: >
-        dotnet publish App/AegisLink.App.csproj 
-        -c Release 
-        -r win-x64 
-        --self-contained true 
-        -p:PublishSingleFile=true 
-        -p:IncludeNativeLibrariesForSelfExtract=true 
-        -o ./publish
-
-    - name: Upload Tactical Binary
-      uses: actions/upload-artifact@v4
-      with:
-        name: AegisLink-v1.0.0-TACTICAL
-        path: ./publish/AegisLink.App.exe
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 6.0.x
+      - name: Restore
+        run: dotnet restore AegisLink.sln
+      - name: Build
+        run: dotnet build AegisLink.sln --configuration Release --no-restore
+      - name: Test
+        run: dotnet test AegisLink.sln --no-build --verbosity normal
