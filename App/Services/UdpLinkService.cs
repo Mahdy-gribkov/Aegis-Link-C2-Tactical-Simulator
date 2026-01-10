@@ -21,7 +21,7 @@ namespace AegisLink.App.Services
         private byte _currentChallenge;
         private IPEndPoint? _lockedEndPoint;
 
-        public event Action<TelemetryFrame> OnFrameReceived;
+        public event Action<TelemetryFrame>? OnFrameReceived;
 
         public UdpLinkService()
         {

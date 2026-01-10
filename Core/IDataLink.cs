@@ -9,7 +9,7 @@ namespace AegisLink.Core
         /// Fired when a valid TelemetryFrame is received.
         /// Warning: This event is raised on a background thread.
         /// </summary>
-        event Action<TelemetryFrame> OnFrameReceived;
+        event Action<TelemetryFrame>? OnFrameReceived;
 
         /// <summary>
         /// Sends a command asynchronously to the tactical unit.

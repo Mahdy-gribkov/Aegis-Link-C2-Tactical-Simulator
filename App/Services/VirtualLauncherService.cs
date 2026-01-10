@@ -17,7 +17,7 @@ namespace AegisLink.App.Services
         private int _simBattery = 100;
         private float _simSignal = -40;
 
-        public event Action<TelemetryFrame> OnFrameReceived;
+        public event Action<TelemetryFrame>? OnFrameReceived;
 
         public VirtualLauncherService()
         {
