@@ -14,4 +14,4 @@ jobs:
       - name: Build
         run: dotnet build AegisLink.sln --configuration Release --no-restore
       - name: Test
-        run: dotnet test AegisLink.sln --no-build --verbosity normal
+        run: dotnet test AegisLink.sln --configuration Release --no-build --verbosity normal
