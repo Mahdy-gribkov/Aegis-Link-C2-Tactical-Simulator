@@ -14,3 +14,6 @@ The `IDataLink` interface allows for seamless transition between **Live Hardware
 
 ## Custom MVVM Foundation
 By implementing a custom `ViewModelBase` and `RelayCommand`, the system maintains a zero-dependency footprint on external frameworks like Prism or CommunityToolkit. This ensures maximum portability and demonstrates a deep understanding of the MVVM pattern and the **INotifyPropertyChanged** mechanism.
+
+## Automated Quality Assurance & Deployment
+To guarantee mission integrity, Aegis-Link employs a **GitHub Actions CI/CD Pipeline**. Every commit triggers a full suite of unit tests verifying the binary protocol and security handshake. Upon a successful merge to `main`, a **Self-Contained Release Candidate** is automatically published as a GitHub Artifact, ensuring that a "Flight-Ready" build is always accessible for deployment to ruggedized hardware without external runtime dependencies.

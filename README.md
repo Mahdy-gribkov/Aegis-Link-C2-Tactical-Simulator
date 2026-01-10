@@ -1,5 +1,7 @@
 # Aegis-Link C2 Tactical Simulator
 
+![Build Status](https://github.com/Mahdy-gribkov/Aegis-Link-C2-Tactical-Simulator/actions/workflows/tactical-ci-cd.yml/badge.svg)
+
 **Aegis-Link** is a high-performance C2 (Command & Control) Tactical Simulator built on .NET 6 WPF. It provides a secure, low-latency bridge between a desktop dashboard and the M5Stack Cardputer.
 
 ## 🚀 Quick Start (Deployment Build)
