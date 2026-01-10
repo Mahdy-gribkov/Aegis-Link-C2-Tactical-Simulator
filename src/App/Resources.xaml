@@ -9,6 +9,6 @@
     <sys:String x:Key="LabelSignal">SIGNAL (dB)</sys:String>
     <sys:String x:Key="ButtonSendPing">◢ SEND PING</sys:String>
     <sys:String x:Key="ButtonSimulation">SIMULATION MODE</sys:String>
-    <sys:String x:Key="SystemStatus">AEGIS-LINK PHOENIX v2.0.1 | .NET 6.0 LTS</sys:String>
+    <sys:String x:Key="SystemStatus">AEGIS-LINK PHOENIX v2.0.2 | .NET 6.0 LTS</sys:String>
     
 </ResourceDictionary>

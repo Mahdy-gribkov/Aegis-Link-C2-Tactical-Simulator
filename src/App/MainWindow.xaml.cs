@@ -67,15 +67,19 @@ namespace AegisLink.App
             timer.Start();
         }
 
-        private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void TitleBar_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.ClickCount == 1)
-                DragMove();
-        }
-
-        private void TitleBar_DoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+            if (e.ChangedButton == MouseButton.Left)
+            {
+                if (e.ClickCount == 2)
+                {
+                    WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+                }
+                else
+                {
+                    DragMove();
+                }
+            }
         }
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

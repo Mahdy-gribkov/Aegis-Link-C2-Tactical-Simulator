@@ -12,8 +12,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <SuppressTfmSupportBuildErrors>true</SuppressTfmSupportBuildErrors>
-    <Version>2.0.1.0</Version>
-    <AssemblyVersion>2.0.1.0</AssemblyVersion>
+    <Version>2.0.2.0</Version>
+    <AssemblyVersion>2.0.2.0</AssemblyVersion>
     <PublishReadyToRun>true</PublishReadyToRun>
   </PropertyGroup>
 
