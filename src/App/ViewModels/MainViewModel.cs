@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace AegisLink.App.ViewModels
 {
@@ -16,12 +17,37 @@ namespace AegisLink.App.ViewModels
         private readonly UdpLinkService _realLinkService;
         private readonly MissionRepository _missionRepository;
         private VirtualLauncherService? _simService;
+        private readonly DispatcherTimer _missionClockTimer;
+        private DateTime _missionStartTime;
 
         private bool _isSimulationActive;
         public bool IsSimulationActive
         {
             get => _isSimulationActive;
             set => SetProperty(ref _isSimulationActive, value);
+        }
+
+        // Mission Clock
+        private string _missionClock = "00:00:00";
+        public string MissionClock
+        {
+            get => _missionClock;
+            set => SetProperty(ref _missionClock, value);
+        }
+
+        // Terminal
+        private int _terminalHeight = 0;
+        public int TerminalHeight
+        {
+            get => _terminalHeight;
+            set => SetProperty(ref _terminalHeight, value);
+        }
+
+        private Visibility _terminalVisibility = Visibility.Collapsed;
+        public Visibility TerminalVisibility
+        {
+            get => _terminalVisibility;
+            set => SetProperty(ref _terminalVisibility, value);
         }
 
         // Telemetry Properties
@@ -53,7 +79,7 @@ namespace AegisLink.App.ViewModels
             set => SetProperty(ref _signalStrength, value);
         }
 
-        private string _connectionStatus = "DISCONNECTED";
+        private string _connectionStatus = "STANDBY";
         public string ConnectionStatus
         {
             get => _connectionStatus;
@@ -74,100 +100,78 @@ namespace AegisLink.App.ViewModels
             _missionRepository = missionRepository ?? throw new ArgumentNullException(nameof(missionRepository));
             _activeDataLink = _realLinkService;
 
-            // Enable thread-safe collection access for the UI
             BindingOperations.EnableCollectionSynchronization(CommandLog, _logLock);
-
-            // Subscribe to real telemetry initially
             _activeDataLink.OnFrameReceived += OnFrameReceived;
 
             SendPingCommand = new RelayCommand(ExecuteSendPing);
             ToggleSimulationCommand = new RelayCommand(ExecuteToggleSimulation);
+
+            // Mission Clock
+            _missionStartTime = DateTime.Now;
+            _missionClockTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+            _missionClockTimer.Tick += (s, e) => 
+            {
+                var elapsed = DateTime.Now - _missionStartTime;
+                MissionClock = elapsed.ToString(@"hh\:mm\:ss");
+            };
+            _missionClockTimer.Start();
             
-            AddLog("System Initialized. Mode: REAL HARDWARE");
-            _ = _missionRepository.LogEventAsync("SYSTEM_INIT", "Application started in Real Hardware mode.");
+            AddLogEntry("[SYSTEM] Aegis-Link Tactical Console Initialized");
+            AddLogEntry("[SYSTEM] Mode: STANDBY | Awaiting Link");
+            _ = _missionRepository.LogEventAsync("SYSTEM_INIT", "Flagship Console v1.6.0 started.");
         }
 
         private void ExecuteToggleSimulation(object? obj)
         {
-            // Unsubscribe from current
             _activeDataLink.OnFrameReceived -= OnFrameReceived;
 
             if (IsSimulationActive)
             {
-                // Switch to SIM
-                AddLog("Switching to SIMULATION MODE...");
+                AddLogEntry("[MODE] Switching to SIMULATION...");
                 ConnectionStatus = "SIMULATING";
                 _simService = new VirtualLauncherService();
                 _activeDataLink = _simService;
-                _ = _missionRepository.LogEventAsync("MODE_SWITCH", "User switched to SIMULATION mode.");
+                _ = _missionRepository.LogEventAsync("MODE_SWITCH", "SIMULATION mode activated.");
             }
             else
             {
-                // Switch to REAL
-                AddLog("Switching to REAL HARDWARE...");
-                ConnectionStatus = "DISCONNECTED";
+                AddLogEntry("[MODE] Switching to LIVE HARDWARE...");
+                ConnectionStatus = "STANDBY";
                 _simService?.Dispose();
                 _simService = null;
                 _activeDataLink = _realLinkService;
-                _ = _missionRepository.LogEventAsync("MODE_SWITCH", "User switched to REAL HARDWARE mode.");
+                _ = _missionRepository.LogEventAsync("MODE_SWITCH", "LIVE HARDWARE mode activated.");
             }
 
-            // Subscribe to new
             _activeDataLink.OnFrameReceived += OnFrameReceived;
         }
 
         private void OnFrameReceived(TelemetryFrame frame)
         {
-            // Marshal execution to the Main UI Thread
             Application.Current.Dispatcher.Invoke(() =>
             {
-                // Mapping Frame data to View Model Properties
-                // Assuming Latitude -> Azimuth, Longitude -> Elevation for simulator context
                 Azimuth = frame.Latitude;
                 Elevation = frame.Longitude;
                 BatteryLevel = frame.BatteryLevel;
                 SignalStrength = frame.SignalStrength;
-                
-                ConnectionStatus = "CONNECTED LIVE";
-
-                // Log periodically or on status change? For now, just logging errors or specific codes
-                // To avoid spamming the log at 60Hz, we might only log if status changes, 
-                // but for debug we can log every Nth frame or similar.
-                // For this requirement, we just satisfy the "Command Log" existence.
+                ConnectionStatus = "◉ LINKED";
             });
         }
 
         private async void ExecuteSendPing(object? obj)
         {
-            AddLog("Sending PING...");
-            byte[] ping = new byte[] { 0x50, 0x49, 0x1E, 0x47 }; // "PING" (Slight variant for demo)
+            AddLogEntry("[COMMS] Transmitting PING...");
+            byte[] ping = new byte[] { 0x50, 0x49, 0x4E, 0x47 };
             await _activeDataLink.SendCommandAsync(ping);
             await _missionRepository.LogEventAsync("COMMAND_SENT", "PING");
+            AddLogEntry("[COMMS] PING acknowledged");
         }
 
-        private void AddLog(string message)
+        public void AddLogEntry(string message)
         {
-            // Because we used EnableCollectionSynchronization, we can technically modify this from any thread?
-            // Actually, EnableCollectionSynchronization allows the *View* to read it safely while we write.
-            // But if we write from a background thread, ObservableCollection raises CollectionChanged.
-            // WPF *automatically* marshals CollectionChanged events if EnableCollectionSynchronization is active?
-            // Yes, predominantly for reading. Writing should still ideally be locked or dispatched 
-            // if we want to be 100% safe, but the lock object handles the synchronization.
-            // However, to be absolutely safe and consistent with "Invoking" updates:
-            
             lock (_logLock)
             {
-               // Since we are invoking property updates on Dispatcher, we can log there too 
-               // OR we can trust the Synchronization. Let's use Dispatcher for safety if unsure, 
-               // but EnableCollectionSynchronization is specifically for this.
-               // Let's rely on the mechanism requested: "Use BindingOperations.EnableCollectionSynchronization"
-               
-                // We'll wrap in Dispatcher just to be sure the Add operation itself doesn't conflict 
-                // if unrelated threads bang on it, but the Lock protects the integrity.
-                // The prompt says: "allow the network thread to add logs without crashing the UI."
-                
-                // So we can do:
-                 CommandLog.Add($"[{DateTime.Now:HH:mm:ss}] {message}");
+                CommandLog.Add($"[{DateTime.Now:HH:mm:ss}] {message}");
             }
         }
     }

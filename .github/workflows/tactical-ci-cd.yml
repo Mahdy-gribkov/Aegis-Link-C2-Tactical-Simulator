@@ -97,6 +97,11 @@ jobs:
       
       - name: Publish Tactical Release
         run: dotnet publish src/App/AegisLink.App.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:IncludeAllContentForSelfExtract=true -p:DebugType=None -p:DebugSymbols=false -p:Version=${{ env.VERSION }} -o ./publish
+
+      - name: Compute SHA-256 Hash
+        run: |
+          $hash = (Get-FileHash -Path ./publish/AegisLink.App.exe -Algorithm SHA256).Hash
+          echo "SHA256=$hash" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
       
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
@@ -104,13 +109,29 @@ jobs:
           files: ./publish/AegisLink.App.exe
           generate_release_notes: true
           body: |
-            ## Aegis-Link Tactical C2 Interface
-            **Version:** ${{ env.VERSION }}
-            **Platform:** Windows x64 (Self-Contained)
+            ### 🛡️ AEGIS TACTICAL RELEASE v${{ env.VERSION }}
             
-            ### Installation
+            **Classification:** UNCLASSIFIED // INTERNAL USE ONLY
+            **Platform:** Windows x64 (Self-Contained Single-File)
+            **Build Date:** ${{ github.event.head_commit.timestamp }}
+            
+            ---
+            
+            #### Integrity Verification
+            ```
+            SHA-256: ${{ env.SHA256 }}
+            ```
+            
+            #### Installation
             1. Download `AegisLink.App.exe`
-            2. Run directly (no extraction needed)
+            2. Run directly (no extraction required)
+            3. Enable Simulation Mode to verify functionality
+            
+            #### Security Features
+            - Rate Limiting: 50 packets/sec per source
+            - Replay Protection: Sequence ID validation
+            - Endpoint Locking: XOR challenge-response
             
             ---
             *Lead Systems Architect: Mahdy Gribkov*
+            *Classification: UNCLASSIFIED*

@@ -1,5 +1,7 @@
+/* Project Aegis-Link | Tactical C2 Interface | Security Hardened UDP Link */
 using AegisLink.Core;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
@@ -20,6 +22,13 @@ namespace AegisLink.App.Services
         private bool _isHandshakeComplete = false;
         private byte _currentChallenge;
         private IPEndPoint? _lockedEndPoint;
+
+        // Rate Limiting (max 50 packets/sec per IP)
+        private readonly Dictionary<string, (int Count, DateTime WindowStart)> _rateLimitTable = new();
+        private const int MAX_PACKETS_PER_SECOND = 50;
+
+        // Replay Protection
+        private uint _lastSequenceId = 0;
 
         public event Action<TelemetryFrame>? OnFrameReceived;
 
@@ -43,8 +52,14 @@ namespace AegisLink.App.Services
                     byte[] payload = result.Buffer;
                     IPEndPoint remoteEp = result.RemoteEndPoint;
 
+                    // SECURITY: Rate Limiting
+                    if (!CheckRateLimit(remoteEp))
+                    {
+                        Debug.WriteLine($"[SECURITY_WARNING] FLOOD DETECTED from {remoteEp} - packet dropped");
+                        continue;
+                    }
+
                     // SECURITY: Buffer Overflow Protection
-                    // Reject oversized packets before further processing to prevent memory pressure or exploitation.
                     if (payload.Length > 1024)
                     {
                         Debug.WriteLine($"[SECURITY_WARNING] Dropped oversized packet ({payload.Length} bytes) from {remoteEp}");
@@ -138,11 +153,42 @@ namespace AegisLink.App.Services
                 return;
             }
 
-            // Zero-copy conversion (well, using the buffer directly)
             TelemetryFrame frame = ProtocolMapper.FromBytes(payload);
 
-            // Fire event on background thread (UI-Agnostic)
+            // SECURITY: Replay Protection - check sequence
+            if (frame.StatusCodes <= _lastSequenceId && _lastSequenceId != 0)
+            {
+                Debug.WriteLine($"[SECURITY_WARNING] Replay attack detected - SeqID {frame.StatusCodes} <= {_lastSequenceId}");
+                return;
+            }
+            _lastSequenceId = frame.StatusCodes;
+
             OnFrameReceived?.Invoke(frame);
+        }
+
+        private bool CheckRateLimit(IPEndPoint remoteEp)
+        {
+            var key = remoteEp.Address.ToString();
+            var now = DateTime.UtcNow;
+
+            if (_rateLimitTable.TryGetValue(key, out var entry))
+            {
+                if ((now - entry.WindowStart).TotalSeconds < 1)
+                {
+                    if (entry.Count >= MAX_PACKETS_PER_SECOND)
+                        return false;
+                    _rateLimitTable[key] = (entry.Count + 1, entry.WindowStart);
+                }
+                else
+                {
+                    _rateLimitTable[key] = (1, now);
+                }
+            }
+            else
+            {
+                _rateLimitTable[key] = (1, now);
+            }
+            return true;
         }
 
         public async Task SendCommandAsync(byte[] command)
