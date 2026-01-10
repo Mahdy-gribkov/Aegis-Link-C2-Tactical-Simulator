@@ -40,7 +40,7 @@
 
                 <TextBlock Text="▸ LINK QUALITY" FontSize="12" Foreground="#00FFFF" FontFamily="Consolas" Margin="0,20,0,10"/>
                 <Border Background="#080808" CornerRadius="3" Height="80" BorderBrush="#333333" BorderThickness="1">
-                    <Polyline x:Name="LinkGraph" Stroke="#00FF00" StrokeThickness="1" Margin="5"/>
+                    <Polyline Points="{Binding SignalPoints}" Stroke="#00FF00" StrokeThickness="1" Margin="5"/>
                 </Border>
             </StackPanel>
         </Border>

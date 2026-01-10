@@ -45,7 +45,7 @@
                 <Grid>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="15,0">
                         <TextBlock Text="◢ AEGIS-LINK" FontSize="16" FontWeight="Bold" Foreground="#00FFFF" FontFamily="Consolas"/>
-                        <TextBlock Text=" | PHOENIX v2.0.2" FontSize="12" Foreground="#666666" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                        <TextBlock Text=" | PHOENIX v2.1.0" FontSize="12" Foreground="#666666" Margin="10,0,0,0" VerticalAlignment="Center"/>
                         <TextBlock Text=" | " Foreground="#333333" Margin="10,0"/>
                         <TextBlock Text="{Binding MissionClock}" FontSize="12" Foreground="#FFB000" FontFamily="Consolas" VerticalAlignment="Center"/>
                     </StackPanel>

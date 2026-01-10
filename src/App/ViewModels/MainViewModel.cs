@@ -114,6 +114,15 @@ namespace AegisLink.App.ViewModels
             set => SetProperty(ref _connectionStatus, value);
         }
 
+        // Signal Graph Points
+        private System.Windows.Media.PointCollection _signalPoints = new();
+        public System.Windows.Media.PointCollection SignalPoints
+        {
+            get => _signalPoints;
+            set => SetProperty(ref _signalPoints, value);
+        }
+        private int _graphX = 0;
+
         public ObservableCollection<string> CommandLog { get; } = new();
         private readonly object _logLock = new();
 
@@ -142,9 +151,15 @@ namespace AegisLink.App.ViewModels
             _simulationTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
             _simulationTimer.Tick += SimulationTimer_Tick;
 
-            AddLogEntry("[SYSTEM] Aegis-Link Phoenix v2.0.0 Initialized");
+            // Set default view
+            Application.Current.Dispatcher.BeginInvoke(() => 
+            {
+                CurrentViewTemplate = Application.Current.MainWindow?.FindResource("DashboardTemplate") as DataTemplate;
+            });
+
+            AddLogEntry("[SYSTEM] Aegis-Link Phoenix v2.1.0 Initialized");
             AddLogEntry("[SYSTEM] Press [~] for terminal, [F11] for fullscreen");
-            _ = _missionRepository.LogEventAsync("SYSTEM_INIT", "Phoenix v2.0.0 started.");
+            _ = _missionRepository.LogEventAsync("SYSTEM_INIT", "Phoenix v2.1.0 started.");
         }
 
         private void SimulationTimer_Tick(object? sender, EventArgs e)
@@ -155,6 +170,37 @@ namespace AegisLink.App.ViewModels
             Distance = 50 + 30 * Math.Sin(DateTime.Now.Ticks / 10000000.0);
             BatteryLevel = Math.Max(5, 100 - (int)((DateTime.Now - _missionStartTime).TotalSeconds / 2) % 100);
             SignalStrength = -40 + (float)(20 * Math.Sin(DateTime.Now.Ticks / 5000000.0));
+
+            // Update signal graph (scrolling left)
+            UpdateSignalGraph();
+        }
+
+        private void UpdateSignalGraph()
+        {
+            const int MaxPoints = 100;
+            const double GraphHeight = 70;
+            
+            // Map signal (-80 to 0 dB) to graph Y (70 to 0)
+            double y = GraphHeight - ((SignalStrength + 80) / 80.0 * GraphHeight);
+            y = Math.Clamp(y, 0, GraphHeight);
+
+            var newPoints = new System.Windows.Media.PointCollection();
+            
+            // Shift existing points left
+            foreach (var pt in SignalPoints)
+            {
+                if (pt.X > 0)
+                    newPoints.Add(new System.Windows.Point(pt.X - 2, pt.Y));
+            }
+            
+            // Add new point
+            newPoints.Add(new System.Windows.Point(MaxPoints * 2, y));
+            
+            // Trim to max points
+            while (newPoints.Count > MaxPoints)
+                newPoints.RemoveAt(0);
+
+            SignalPoints = newPoints;
         }
 
         public void NavigateToRadar()
