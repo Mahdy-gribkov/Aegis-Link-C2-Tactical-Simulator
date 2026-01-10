@@ -32,6 +32,9 @@ public partial class ShellViewModel : ObservableObject
     [ObservableProperty] private PointCollection _signalPoints = new();
     [ObservableProperty] private int _fps = 60;
     [ObservableProperty] private int _packetsPerSecond = 0;
+    [ObservableProperty] private bool _isSignalLost = true;
+    [ObservableProperty] private bool _isLinkEstablished = false;
+    [ObservableProperty] private bool _isMuted = false;
 
     public string BuildVersion => Assembly.GetExecutingAssembly()
         .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "3.0.0";
@@ -75,13 +78,22 @@ public partial class ShellViewModel : ObservableObject
 
     private void Watchdog_Tick(object? sender, EventArgs e)
     {
-        if (CurrentState == ApplicationState.Tracking && (DateTime.Now - _lastPacketTime).TotalSeconds > 5)
+        var secondsSincePacket = (DateTime.Now - _lastPacketTime).TotalSeconds;
+        
+        if (CurrentState == ApplicationState.Tracking && secondsSincePacket > 5)
         {
             CurrentState = ApplicationState.Offline;
             ConnectionStatus = "LOST LINK";
+            IsSignalLost = true;
+            IsLinkEstablished = false;
             _soundService.PlayAlert();
             _logger.Info("[ALERT] Signal lost - no packets for 5 seconds");
             ShowToast("⚠ SIGNAL LOST");
+        }
+        else if (CurrentState == ApplicationState.Idle && secondsSincePacket > 5)
+        {
+            IsSignalLost = true;
+            IsLinkEstablished = false;
         }
     }
 
@@ -95,10 +107,12 @@ public partial class ShellViewModel : ObservableObject
             SignalStrength = evt.SignalStrength;
             CurrentState = ApplicationState.Tracking;
             ConnectionStatus = "◉ TRACKING";
+            IsSignalLost = false;
+            IsLinkEstablished = true;
             
             if (evt.Type == EventType.Burst)
             {
-                _soundService.PlayBeep();
+                _soundService.PlayChirp();
                 ShowToast("📡 Burst Detected");
             }
 
@@ -157,6 +171,17 @@ public partial class ShellViewModel : ObservableObject
 
     [RelayCommand]
     private void ToggleTerminal() => IsTerminalVisible = !IsTerminalVisible;
+
+    [RelayCommand]
+    private void ClearLog() => TerminalLog.Clear();
+
+    [RelayCommand]
+    private void ToggleMute()
+    {
+        IsMuted = !IsMuted;
+        _soundService.IsMuted = IsMuted;
+        ShowToast(IsMuted ? "🔇 Audio Muted" : "🔊 Audio Enabled");
+    }
 
     [RelayCommand]
     private void ExecuteCommand(string? input)
