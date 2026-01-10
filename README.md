@@ -2,6 +2,8 @@
 
 ![Build Status](https://github.com/Mahdy-gribkov/Aegis-Link-C2-Tactical-Simulator/actions/workflows/tactical-ci-cd.yml/badge.svg)
 
+[![Download Latest Release](https://img.shields.io/badge/Download-Latest%20Release-00FFFF?style=for-the-badge&logo=github)](https://github.com/Mahdy-gribkov/Aegis-Link-C2-Tactical-Simulator/releases/latest)
+
 **Aegis-Link** is a defense-grade Command & Control (C2) tactical interface built on .NET 6.0 LTS. It provides secure, low-latency telemetry integration between desktop command stations and M5Stack Cardputer field hardware.
 
 ---
@@ -100,14 +102,14 @@ See [SECURITY.md](docs/SECURITY.md) for detailed protocol specification.
 ## Maintainer
 
 **Mahdy Gribkov**  
-Core Engineering & Systems Architecture  
+Lead Systems Architect  
 [GitHub](https://github.com/Mahdy-gribkov)
 
 ---
 
 ## License
 
-This project is provided for educational and tactical simulation purposes. All dependencies are licensed under permissive open-source licenses (MIT, Apache 2.0). See [DEPENDENCY_MANIFEST.md](DEPENDENCY_MANIFEST.md) for complete license information.
+This project is provided for educational and tactical simulation purposes. All dependencies are licensed under permissive open-source licenses (MIT, Apache 2.0). See [docs/DEPENDENCY_MANIFEST.md](docs/DEPENDENCY_MANIFEST.md) for complete license information.
 
 ---
 
