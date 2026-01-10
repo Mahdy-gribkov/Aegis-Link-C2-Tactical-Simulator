@@ -28,13 +28,13 @@
                 <DockPanel>
                     <Menu DockPanel.Dock="Top" Background="#111111" Foreground="#00FFFF" FontFamily="Consolas" FontSize="12">
                         <MenuItem Header="_FILE" Foreground="#00FFFF">
-                            <MenuItem Header="Export Logs" Foreground="#E0E0E0"/>
+                            <MenuItem Header="Export Logs" Foreground="#E0E0E0" Click="ExportLogs_Click"/>
                             <Separator/>
                             <MenuItem Header="Exit" Foreground="#E0E0E0" Click="MenuExit_Click"/>
                         </MenuItem>
                         <MenuItem Header="_VIEW" Foreground="#00FFFF">
-                            <MenuItem Header="Toggle Fullscreen" Foreground="#E0E0E0"/>
-                            <MenuItem Header="Theme: Night" Foreground="#E0E0E0" IsChecked="True"/>
+                            <MenuItem Header="Toggle Fullscreen" Foreground="#E0E0E0" Click="FullScreen_Click"/>
+                            <MenuItem Header="Toggle Theme (Day/Night)" Foreground="#E0E0E0" Click="ToggleTheme_Click"/>
                         </MenuItem>
                         <MenuItem Header="_COMMS" Foreground="#00FFFF">
                             <MenuItem Header="Force Reconnect" Foreground="#E0E0E0"/>
@@ -48,7 +48,7 @@
                     <Grid Margin="20,0">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <TextBlock Text="◢ AEGIS-LINK" FontSize="20" FontWeight="Bold" Foreground="#00FFFF" FontFamily="Consolas"/>
-                            <TextBlock Text=" | TACTICAL C2 INTERFACE v1.3.0" FontSize="14" Foreground="#888888" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                            <TextBlock Text=" | TACTICAL C2 INTERFACE v1.5.0" FontSize="14" Foreground="#888888" Margin="10,0,0,0" VerticalAlignment="Center"/>
                         </StackPanel>
                         <TextBlock Text="{StaticResource StatusNominal}" FontSize="12" Foreground="#00FF00" HorizontalAlignment="Right" VerticalAlignment="Center" FontFamily="Consolas"/>
                     </Grid>

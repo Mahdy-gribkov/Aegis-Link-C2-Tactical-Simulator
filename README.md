@@ -157,7 +157,9 @@ dotnet run --project src/App/AegisLink.App.csproj
 
 | Version | Status | Description |
 |---------|--------|-------------|
-| **1.3.0** | **CURRENT** | Field Manual documentation, UX overhaul |
+| **1.5.0** | **CURRENT** | Active theming engine (Day/Night modes), cleaner artifacts |
+| 1.4.0 | Stable | Universal protocol documentation, single-file compression |
+| 1.3.0 | Stable | Field Manual documentation, UX overhaul |
 | 1.2.0 | Stable | Optimized CI/CD with NuGet caching |
 | 1.1.0 | Superseded | XAML hotfix, semantic versioning |
 | 1.0.0 | Superseded | Initial release |
