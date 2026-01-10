@@ -1,17 +1,24 @@
 ﻿<Window x:Class="AegisLink.App.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:converters="clr-namespace:AegisLink.App.Converters"
+        xmlns:views="clr-namespace:AegisLink.App.Views"
         Title="AEGIS-LINK | TACTICAL C2 CONSOLE" Height="800" Width="1400"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
-        WindowStartupLocation="CenterScreen" MouseLeftButtonDown="Window_MouseLeftButtonDown">
+        WindowStartupLocation="CenterScreen" 
+        MouseLeftButtonDown="Window_MouseLeftButtonDown"
+        KeyDown="Window_KeyDown">
 
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Resources.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-            <converters:BatteryToColorConverter x:Key="BatteryToColorConverter"/>
+            <DataTemplate x:Key="DashboardTemplate">
+                <views:DashboardView/>
+            </DataTemplate>
+            <DataTemplate x:Key="RadarTemplate">
+                <views:RadarView/>
+            </DataTemplate>
         </ResourceDictionary>
     </Window.Resources>
 
@@ -22,17 +29,23 @@
                 <RowDefinition Height="40"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="25"/>
             </Grid.RowDefinitions>
+
+            <!-- Scanline Overlay -->
+            <Canvas Grid.RowSpan="5" IsHitTestVisible="False" Opacity="0.03">
+                <Rectangle x:Name="ScanlineBar" Width="2000" Height="2" Fill="#00FF00" Canvas.Top="0"/>
+            </Canvas>
 
             <!-- Power Line -->
             <Border Grid.Row="0" Background="#00FFFF" CornerRadius="10,10,0,0"/>
 
             <!-- Custom Title Bar -->
-            <Border Grid.Row="1" Background="#0A0A0A">
+            <Border Grid.Row="1" Background="#0A0A0A" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown" MouseDoubleClick="TitleBar_DoubleClick">
                 <Grid>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="15,0">
                         <TextBlock Text="◢ AEGIS-LINK" FontSize="16" FontWeight="Bold" Foreground="#00FFFF" FontFamily="Consolas"/>
-                        <TextBlock Text=" | TACTICAL C2 CONSOLE v1.6.0" FontSize="12" Foreground="#666666" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                        <TextBlock Text=" | PHOENIX v2.0.0" FontSize="12" Foreground="#666666" Margin="10,0,0,0" VerticalAlignment="Center"/>
                         <TextBlock Text=" | " Foreground="#333333" Margin="10,0"/>
                         <TextBlock Text="{Binding MissionClock}" FontSize="12" Foreground="#FFB000" FontFamily="Consolas" VerticalAlignment="Center"/>
                     </StackPanel>
@@ -44,173 +57,59 @@
                 </Grid>
             </Border>
 
-            <!-- Main Content: 3-Column Layout -->
-            <Grid Grid.Row="2" Margin="10">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="280"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="250"/>
-                </Grid.ColumnDefinitions>
-
-                <!-- Column 0: Systems Panel -->
-                <Border Grid.Column="0" Background="#0F0F0F" CornerRadius="5" Margin="0,0,5,0" Padding="15">
-                    <StackPanel>
-                        <TextBlock Text="▸ SYSTEM STATUS" FontSize="14" Foreground="#00FFFF" FontFamily="Consolas" Margin="0,0,0,15"/>
-                        
-                        <!-- Connection Status -->
-                        <Border Background="#111111" CornerRadius="3" Padding="10" Margin="0,0,0,10">
-                            <StackPanel>
-                                <TextBlock Text="LINK STATUS" FontSize="10" Foreground="#666666" FontFamily="Consolas"/>
-                                <TextBlock Text="{Binding ConnectionStatus}" FontSize="18" Foreground="#00FF00" FontFamily="Consolas" FontWeight="Bold"/>
-                            </StackPanel>
-                        </Border>
-
-                        <!-- Battery -->
-                        <Border Background="#111111" CornerRadius="3" Padding="10" Margin="0,0,0,10">
-                            <StackPanel>
-                                <TextBlock Text="BATTERY" FontSize="10" Foreground="#666666" FontFamily="Consolas"/>
-                                <TextBlock Text="{Binding BatteryLevel, StringFormat={}{0}%}" FontSize="24" 
-                                           Foreground="{Binding BatteryLevel, Converter={StaticResource BatteryToColorConverter}}" 
-                                           FontFamily="Consolas" FontWeight="Bold"/>
-                            </StackPanel>
-                        </Border>
-
-                        <!-- Signal -->
-                        <Border Background="#111111" CornerRadius="3" Padding="10" Margin="0,0,0,10">
-                            <StackPanel>
-                                <TextBlock Text="SIGNAL STRENGTH" FontSize="10" Foreground="#666666" FontFamily="Consolas"/>
-                                <TextBlock Text="{Binding SignalStrength, StringFormat={}{0:N1} dB}" FontSize="24" Foreground="#00FFFF" FontFamily="Consolas" FontWeight="Bold"/>
-                            </StackPanel>
-                        </Border>
-
-                        <!-- Link Quality Graph Placeholder -->
-                        <TextBlock Text="▸ LINK QUALITY" FontSize="12" Foreground="#00FFFF" FontFamily="Consolas" Margin="0,20,0,10"/>
-                        <Border Background="#080808" CornerRadius="3" Height="80" BorderBrush="#333333" BorderThickness="1">
-                            <Polyline x:Name="LinkGraph" Stroke="#00FF00" StrokeThickness="1" Margin="5"/>
-                        </Border>
-                    </StackPanel>
-                </Border>
-
-                <!-- Column 1: Tactical Display (Radar) -->
-                <Border Grid.Column="1" Background="#080808" CornerRadius="5" Margin="5,0" Padding="10">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-                        
-                        <TextBlock Grid.Row="0" Text="▸ TACTICAL DISPLAY" FontSize="14" Foreground="#00FFFF" FontFamily="Consolas" Margin="0,0,0,10"/>
-                        
-                        <!-- Radar Scope -->
-                        <Canvas x:Name="RadarCanvas" Grid.Row="1" Background="Transparent" ClipToBounds="True">
-                            <!-- Concentric circles drawn in code-behind -->
-                        </Canvas>
-
-                        <!-- Telemetry Overlay -->
-                        <StackPanel Grid.Row="1" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="10">
-                            <TextBlock FontSize="11" Foreground="#666666" FontFamily="Consolas">
-                                <Run Text="AZ: "/><Run Text="{Binding Azimuth, StringFormat=N2}" Foreground="#FFB000"/>
-                                <Run Text="° | EL: "/><Run Text="{Binding Elevation, StringFormat=N2}" Foreground="#FFB000"/>
-                                <Run Text="°"/>
-                            </TextBlock>
-                        </StackPanel>
-                    </Grid>
-                </Border>
-
-                <!-- Column 2: Control Panel -->
-                <Border Grid.Column="2" Background="#0F0F0F" CornerRadius="5" Margin="5,0,0,0" Padding="15">
-                    <StackPanel>
-                        <TextBlock Text="▸ FIRE CONTROL" FontSize="14" Foreground="#FF4444" FontFamily="Consolas" Margin="0,0,0,20"/>
-
-                        <!-- Master Arm -->
-                        <Border Background="#1A0000" CornerRadius="5" Padding="15" Margin="0,0,0,15" BorderBrush="#440000" BorderThickness="1">
-                            <StackPanel>
-                                <TextBlock Text="MASTER ARM" FontSize="12" Foreground="#FF6666" FontFamily="Consolas" Margin="0,0,0,10"/>
-                                <ToggleButton x:Name="MasterArmToggle" Content="◉ SAFE" Width="180" Height="40" 
-                                              Background="#330000" Foreground="#FF4444" BorderBrush="#FF4444" BorderThickness="2"
-                                              FontFamily="Consolas" FontSize="14" FontWeight="Bold"
-                                              Checked="MasterArm_Checked" Unchecked="MasterArm_Unchecked"/>
-                            </StackPanel>
-                        </Border>
-
-                        <!-- Fire Button -->
-                        <Button x:Name="FireButton" Content="◢ ENGAGE" Width="180" Height="50" 
-                                Background="#440000" Foreground="#FF4444" BorderBrush="#FF4444" BorderThickness="2"
-                                FontFamily="Consolas" FontSize="16" FontWeight="Bold" IsEnabled="False"
-                                Click="Fire_Click"/>
-
-                        <Separator Background="#333333" Margin="0,25"/>
-
-                        <TextBlock Text="▸ COMMS" FontSize="14" Foreground="#00FFFF" FontFamily="Consolas" Margin="0,0,0,15"/>
-                        
-                        <Button Content="◢ SEND PING" Command="{Binding SendPingCommand}" 
-                                Width="180" Height="35" Background="#003333" Foreground="#00FFFF" 
-                                BorderBrush="#00FFFF" BorderThickness="1" FontFamily="Consolas" FontSize="12"/>
-
-                        <ToggleButton Content="SIMULATION MODE" IsChecked="{Binding IsSimulationActive}" 
-                                      Command="{Binding ToggleSimulationCommand}" 
-                                      Width="180" Height="30" Margin="0,10,0,0"
-                                      Background="#1A1A1A" Foreground="#888888" BorderBrush="#444444" BorderThickness="1"
-                                      FontFamily="Consolas" FontSize="10"/>
-                    </StackPanel>
-                </Border>
-            </Grid>
+            <!-- Dynamic Content Area -->
+            <ContentControl Grid.Row="2" Content="{Binding}" ContentTemplate="{Binding CurrentViewTemplate}"/>
 
             <!-- Sliding Terminal -->
-            <Border Grid.Row="3" Background="#0A0A0A" BorderBrush="#333333" BorderThickness="0,1,0,0">
-                <Grid>
+            <Border Grid.Row="3" Background="#0A0A0A" BorderBrush="#333333" BorderThickness="0,1,0,0" 
+                    Visibility="{Binding TerminalVisibility}">
+                <Grid Height="150">
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
                         <RowDefinition Height="30"/>
-                        <RowDefinition Height="{Binding TerminalHeight}"/>
                     </Grid.RowDefinitions>
 
-                    <!-- Terminal Toggle -->
-                    <Border Grid.Row="0" Background="#111111">
-                        <ToggleButton x:Name="TerminalToggle" Content="▼ COMMAND TERMINAL" 
-                                      HorizontalAlignment="Center" Background="Transparent" 
-                                      Foreground="#00FFFF" BorderThickness="0" FontFamily="Consolas" FontSize="10"
-                                      Checked="Terminal_Checked" Unchecked="Terminal_Unchecked"/>
-                    </Border>
+                    <ListBox Grid.Row="0" ItemsSource="{Binding CommandLog}" 
+                             Background="Transparent" BorderThickness="0" 
+                             Foreground="#00FF00" FontFamily="Consolas" FontSize="11" Margin="10,5">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="Padding" Value="0,1"/>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                    </ListBox>
 
-                    <!-- Terminal Content -->
-                    <Border Grid.Row="1" Background="#050505" Visibility="{Binding TerminalVisibility}">
-                        <Grid Margin="10">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="*"/>
-                                <RowDefinition Height="30"/>
-                            </Grid.RowDefinitions>
-
-                            <ListBox Grid.Row="0" ItemsSource="{Binding CommandLog}" 
-                                     Background="Transparent" BorderThickness="0" 
-                                     Foreground="#00FF00" FontFamily="Consolas" FontSize="11">
-                                <ListBox.ItemContainerStyle>
-                                    <Style TargetType="ListBoxItem">
-                                        <Setter Property="Padding" Value="0,1"/>
-                                    </Style>
-                                </ListBox.ItemContainerStyle>
-                            </ListBox>
-
-                            <Grid Grid.Row="1">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="AEGIS&gt; " Foreground="#00FFFF" FontFamily="Consolas" VerticalAlignment="Center"/>
-                                <TextBox x:Name="CommandInput" Grid.Column="1" Background="#0A0A0A" Foreground="#00FF00" 
-                                         BorderThickness="0" FontFamily="Consolas" VerticalAlignment="Center"
-                                         KeyDown="CommandInput_KeyDown"/>
-                            </Grid>
-                        </Grid>
-                    </Border>
+                    <Grid Grid.Row="1" Margin="10,0,10,5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="AEGIS&gt; " Foreground="#00FFFF" FontFamily="Consolas" VerticalAlignment="Center"/>
+                        <TextBox x:Name="CommandInput" Grid.Column="1" Background="#0A0A0A" Foreground="#00FF00" 
+                                 BorderThickness="0" FontFamily="Consolas" VerticalAlignment="Center"
+                                 KeyDown="CommandInput_KeyDown"/>
+                    </Grid>
                 </Grid>
             </Border>
 
             <!-- Status Bar -->
-            <Border Grid.Row="3" VerticalAlignment="Bottom" Background="#080808" Height="20" CornerRadius="0,0,10,10">
+            <Border Grid.Row="4" Background="#080808" CornerRadius="0,0,10,10">
                 <Grid Margin="15,0">
-                    <TextBlock Text="{StaticResource SystemStatus}" FontSize="9" Foreground="#444444" VerticalAlignment="Center" FontFamily="Consolas"/>
-                    <TextBlock Text="OPERATOR: M. GRIBKOV | CLEARANCE: UNCLASSIFIED" FontSize="9" Foreground="#444444" HorizontalAlignment="Right" VerticalAlignment="Center" FontFamily="Consolas"/>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Ellipse x:Name="RxIndicator" Width="6" Height="6" Fill="#333333" Margin="0,0,5,0"/>
+                        <TextBlock Text="RX" FontSize="9" Foreground="#444444" FontFamily="Consolas" Margin="0,0,15,0"/>
+                        <Ellipse x:Name="TxIndicator" Width="6" Height="6" Fill="#333333" Margin="0,0,5,0"/>
+                        <TextBlock Text="TX" FontSize="9" Foreground="#444444" FontFamily="Consolas"/>
+                    </StackPanel>
+                    <TextBlock Text="{StaticResource SystemStatus}" FontSize="9" Foreground="#444444" VerticalAlignment="Center" HorizontalAlignment="Center" FontFamily="Consolas"/>
+                    <TextBlock Text="OPERATOR: M. GRIBKOV | [~] Terminal | [F11] Fullscreen" FontSize="9" Foreground="#444444" HorizontalAlignment="Right" VerticalAlignment="Center" FontFamily="Consolas"/>
                 </Grid>
+            </Border>
+
+            <!-- Toast Notification -->
+            <Border x:Name="ToastBorder" Grid.Row="2" VerticalAlignment="Top" HorizontalAlignment="Center" 
+                    Background="#DD000000" CornerRadius="5" Padding="20,10" Margin="0,20,0,0" Visibility="Collapsed">
+                <TextBlock x:Name="ToastText" Text="" FontSize="14" Foreground="#00FFFF" FontFamily="Consolas"/>
             </Border>
         </Grid>
     </Border>

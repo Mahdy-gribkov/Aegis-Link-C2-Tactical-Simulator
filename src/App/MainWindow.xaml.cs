@@ -1,155 +1,178 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Shapes;
-using System.IO;
+using System.Windows.Media.Animation;
+using System.Windows.Threading;
 using AegisLink.App.ViewModels;
 
 namespace AegisLink.App
 {
     public partial class MainWindow : Window
     {
-        private bool _isDarkTheme = true;
-        private WindowState _previousWindowState;
+        private readonly DispatcherTimer _scanlineTimer;
+        private readonly DispatcherTimer _toastTimer;
+        private readonly List<string> _commandHistory = new();
+        private int _historyIndex = -1;
 
         public MainWindow()
         {
             InitializeComponent();
             Loaded += MainWindow_Loaded;
+
+            // Scanline animation
+            _scanlineTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(30) };
+            _scanlineTimer.Tick += Scanline_Tick;
+            _scanlineTimer.Start();
+
+            // Toast timer
+            _toastTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
+            _toastTimer.Tick += (s, e) => { ToastBorder.Visibility = Visibility.Collapsed; _toastTimer.Stop(); };
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            DrawRadarGrid();
-        }
-
-        private void DrawRadarGrid()
-        {
-            RadarCanvas.Children.Clear();
-            var centerX = RadarCanvas.ActualWidth / 2;
-            var centerY = RadarCanvas.ActualHeight / 2;
-            var maxRadius = Math.Min(centerX, centerY) - 10;
-
-            if (maxRadius <= 0) return;
-
-            // Concentric circles
-            for (int i = 1; i <= 4; i++)
+            var vm = DataContext as MainViewModel;
+            if (vm != null)
             {
-                var radius = maxRadius * i / 4;
-                var circle = new Ellipse
-                {
-                    Width = radius * 2,
-                    Height = radius * 2,
-                    Stroke = new SolidColorBrush(Color.FromArgb(80, 0, 255, 0)),
-                    StrokeThickness = 1
-                };
-                System.Windows.Controls.Canvas.SetLeft(circle, centerX - radius);
-                System.Windows.Controls.Canvas.SetTop(circle, centerY - radius);
-                RadarCanvas.Children.Add(circle);
+                vm.ToastRequested += ShowToast;
+                vm.RxFlashRequested += FlashRxIndicator;
             }
-
-            // Crosshairs
-            var hLine = new Line
-            {
-                X1 = 10, Y1 = centerY,
-                X2 = RadarCanvas.ActualWidth - 10, Y2 = centerY,
-                Stroke = new SolidColorBrush(Color.FromArgb(60, 0, 255, 0)),
-                StrokeThickness = 1
-            };
-            var vLine = new Line
-            {
-                X1 = centerX, Y1 = 10,
-                X2 = centerX, Y2 = RadarCanvas.ActualHeight - 10,
-                Stroke = new SolidColorBrush(Color.FromArgb(60, 0, 255, 0)),
-                StrokeThickness = 1
-            };
-            RadarCanvas.Children.Add(hLine);
-            RadarCanvas.Children.Add(vLine);
-
-            // Center dot
-            var centerDot = new Ellipse
-            {
-                Width = 6, Height = 6,
-                Fill = new SolidColorBrush(Color.FromRgb(0, 255, 255))
-            };
-            System.Windows.Controls.Canvas.SetLeft(centerDot, centerX - 3);
-            System.Windows.Controls.Canvas.SetTop(centerDot, centerY - 3);
-            RadarCanvas.Children.Add(centerDot);
         }
 
-        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private double _scanlineY = 0;
+        private void Scanline_Tick(object? sender, EventArgs e)
         {
-            if (e.LeftButton == MouseButtonState.Pressed)
+            _scanlineY += 2;
+            if (_scanlineY > ActualHeight) _scanlineY = 0;
+            System.Windows.Controls.Canvas.SetTop(ScanlineBar, _scanlineY);
+        }
+
+        public void ShowToast(string message)
+        {
+            ToastText.Text = message;
+            ToastBorder.Visibility = Visibility.Visible;
+            _toastTimer.Stop();
+            _toastTimer.Start();
+        }
+
+        private void FlashRxIndicator()
+        {
+            RxIndicator.Fill = new SolidColorBrush(Colors.Lime);
+            var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
+            timer.Tick += (s, e) => { RxIndicator.Fill = new SolidColorBrush(Color.FromRgb(51, 51, 51)); timer.Stop(); };
+            timer.Start();
+        }
+
+        private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ClickCount == 1)
                 DragMove();
         }
 
-        private void Minimize_Click(object sender, RoutedEventArgs e)
-        {
-            WindowState = WindowState.Minimized;
-        }
-
-        private void Maximize_Click(object sender, RoutedEventArgs e)
+        private void TitleBar_DoubleClick(object sender, MouseButtonEventArgs e)
         {
             WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
         }
 
-        private void Close_Click(object sender, RoutedEventArgs e)
+        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            Application.Current.Shutdown();
+            // Intentionally empty - drag handled by title bar
         }
 
-        private void MasterArm_Checked(object sender, RoutedEventArgs e)
-        {
-            MasterArmToggle.Content = "◉ ARMED";
-            MasterArmToggle.Foreground = new SolidColorBrush(Colors.Red);
-            FireButton.IsEnabled = true;
-            FireButton.Background = new SolidColorBrush(Color.FromRgb(100, 0, 0));
+        private void Minimize_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
+        private void Maximize_Click(object sender, RoutedEventArgs e) => WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+        private void Close_Click(object sender, RoutedEventArgs e) => Application.Current.Shutdown();
 
-            var vm = DataContext as MainViewModel;
-            vm?.AddLogEntry("[SAFETY] MASTER ARM ENABLED - WEAPONS HOT");
-        }
-
-        private void MasterArm_Unchecked(object sender, RoutedEventArgs e)
-        {
-            MasterArmToggle.Content = "◉ SAFE";
-            MasterArmToggle.Foreground = new SolidColorBrush(Color.FromRgb(255, 68, 68));
-            FireButton.IsEnabled = false;
-            FireButton.Background = new SolidColorBrush(Color.FromRgb(68, 0, 0));
-
-            var vm = DataContext as MainViewModel;
-            vm?.AddLogEntry("[SAFETY] MASTER ARM DISABLED - WEAPONS SAFE");
-        }
-
-        private void Fire_Click(object sender, RoutedEventArgs e)
+        private void Window_KeyDown(object sender, KeyEventArgs e)
         {
             var vm = DataContext as MainViewModel;
-            vm?.AddLogEntry("[FIRE CONTROL] *** ENGAGE COMMAND TRANSMITTED ***");
-            System.Media.SystemSounds.Exclamation.Play();
+
+            switch (e.Key)
+            {
+                case Key.F11:
+                    WindowStyle = WindowStyle == WindowStyle.None && WindowState == WindowState.Maximized 
+                        ? WindowStyle.SingleBorderWindow 
+                        : WindowStyle.None;
+                    WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+                    break;
+
+                case Key.Oem3: // Tilde ~
+                    vm?.ToggleTerminal();
+                    if (vm?.TerminalVisibility == Visibility.Visible)
+                        CommandInput.Focus();
+                    break;
+
+                case Key.S when Keyboard.Modifiers == ModifierKeys.Control:
+                    ExportSnapshot(vm);
+                    break;
+
+                case Key.Escape:
+                    vm?.NavigateToDashboard();
+                    break;
+            }
         }
 
-        private void Terminal_Checked(object sender, RoutedEventArgs e)
+        private void ExportSnapshot(MainViewModel? vm)
         {
-            TerminalToggle.Content = "▲ COMMAND TERMINAL";
-        }
-
-        private void Terminal_Unchecked(object sender, RoutedEventArgs e)
-        {
-            TerminalToggle.Content = "▼ COMMAND TERMINAL";
+            if (vm == null) return;
+            try
+            {
+                var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+                    $"AegisLink_Snapshot_{DateTime.Now:yyyyMMdd_HHmmss}.csv");
+                var csv = $"Timestamp,Azimuth,Distance,Battery,Signal\n{DateTime.Now:O},{vm.Azimuth},{vm.Distance},{vm.BatteryLevel},{vm.SignalStrength}";
+                File.WriteAllText(path, csv);
+                ShowToast($"Snapshot saved: {Path.GetFileName(path)}");
+                vm.AddLogEntry($"[EXPORT] Snapshot saved to Desktop");
+            }
+            catch (Exception ex)
+            {
+                ShowToast($"Export failed: {ex.Message}");
+            }
         }
 
         private void CommandInput_KeyDown(object sender, KeyEventArgs e)
         {
+            var vm = DataContext as MainViewModel;
+
             if (e.Key == Key.Enter)
             {
-                var command = CommandInput.Text.Trim().ToUpper();
-                var vm = DataContext as MainViewModel;
-
+                var command = CommandInput.Text.Trim();
                 if (!string.IsNullOrEmpty(command))
                 {
-                    vm?.AddLogEntry($"AEGIS> {command}");
-                    ExecuteCommand(command, vm);
+                    if (!Regex.IsMatch(command, @"^[a-zA-Z0-9 .]*$"))
+                    {
+                        vm?.AddLogEntry("[ERROR] Invalid characters in command");
+                        return;
+                    }
+
+                    _commandHistory.Add(command);
+                    _historyIndex = _commandHistory.Count;
+                    vm?.AddLogEntry($"AEGIS> {command.ToUpper()}");
+                    ExecuteCommand(command.ToUpper(), vm);
                     CommandInput.Clear();
+                }
+            }
+            else if (e.Key == Key.Up && _commandHistory.Count > 0)
+            {
+                if (_historyIndex > 0) _historyIndex--;
+                CommandInput.Text = _commandHistory[_historyIndex];
+                CommandInput.CaretIndex = CommandInput.Text.Length;
+            }
+            else if (e.Key == Key.Down && _commandHistory.Count > 0)
+            {
+                if (_historyIndex < _commandHistory.Count - 1)
+                {
+                    _historyIndex++;
+                    CommandInput.Text = _commandHistory[_historyIndex];
+                }
+                else
+                {
+                    CommandInput.Clear();
+                    _historyIndex = _commandHistory.Count;
                 }
             }
         }
@@ -169,21 +192,21 @@ namespace AegisLink.App
                     Application.Current.Shutdown();
                     break;
                 case "STATUS":
-                    vm?.AddLogEntry($"[STATUS] Battery: {vm.BatteryLevel}% | Signal: {vm.SignalStrength:N1} dB");
+                    vm?.AddLogEntry($"[STATUS] AZ:{vm.Azimuth:N1}° DIST:{vm.Distance:N1}km BAT:{vm.BatteryLevel}% SIG:{vm.SignalStrength:N1}dB");
+                    break;
+                case "RADAR":
+                    vm?.NavigateToRadar();
+                    break;
+                case "HOME":
+                    vm?.NavigateToDashboard();
                     break;
                 case "HELP":
-                    vm?.AddLogEntry("[HELP] Commands: PING, CLEAR, STATUS, EXIT, HELP");
+                    vm?.AddLogEntry("[HELP] PING, CLEAR, STATUS, RADAR, HOME, EXIT, HELP");
                     break;
                 default:
                     vm?.AddLogEntry($"[ERROR] Unknown command: {command}");
                     break;
             }
-        }
-
-        protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
-        {
-            base.OnRenderSizeChanged(sizeInfo);
-            DrawRadarGrid();
         }
     }
 }

@@ -109,10 +109,11 @@ jobs:
           files: ./publish/AegisLink.App.exe
           generate_release_notes: true
           body: |
-            ### 🛡️ AEGIS TACTICAL RELEASE v${{ env.VERSION }}
+            ### 🛡️ AEGIS PUBLIC RELEASE v${{ env.VERSION }}
             
-            **Classification:** UNCLASSIFIED // INTERNAL USE ONLY
-            **Platform:** Windows x64 (Self-Contained Single-File)
+            **Classification:** UNCLASSIFIED // PUBLIC RELEASE
+            **Codename:** PHOENIX
+            **Platform:** Windows x64 (Self-Contained, Trimmed, R2R)
             **Build Date:** ${{ github.event.head_commit.timestamp }}
             
             ---
@@ -125,13 +126,20 @@ jobs:
             #### Installation
             1. Download `AegisLink.App.exe`
             2. Run directly (no extraction required)
-            3. Enable Simulation Mode to verify functionality
+            3. Press [~] to open terminal, [F11] for fullscreen
             
             #### Security Features
             - Rate Limiting: 50 packets/sec per source
             - Replay Protection: Sequence ID validation
             - Endpoint Locking: XOR challenge-response
             
+            #### What's New in Phoenix
+            - Modular view architecture (Dashboard/Radar)
+            - Active simulation with spinning radar blip
+            - Keyboard shortcuts (F11, ~, Ctrl+S, ESC)
+            - Command history and input validation
+            - Trimmed & ReadyToRun for faster startup
+            
             ---
             *Lead Systems Architect: Mahdy Gribkov*
-            *Classification: UNCLASSIFIED*
+            *Classification: UNCLASSIFIED // PUBLIC RELEASE*

@@ -157,7 +157,8 @@ dotnet run --project src/App/AegisLink.App.csproj
 
 | Version | Status | Description |
 |---------|--------|-------------|
-| **1.6.0** | **CURRENT** | Flagship UI overhaul, radar visualization, security hardening |
+| **2.0.0** | **CURRENT** | Phoenix overhaul: modular UI, active sim, trimming, audio |
+| 1.6.0 | Stable | Flagship UI overhaul, radar visualization, security hardening |
 | 1.5.0 | Stable | Active theming engine (Day/Night modes), cleaner artifacts |
 | 1.4.0 | Stable | Universal protocol documentation, single-file compression |
 | 1.3.0 | Stable | Field Manual documentation, UX overhaul |
