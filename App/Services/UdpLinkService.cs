@@ -43,6 +43,14 @@ namespace AegisLink.App.Services
                     byte[] payload = result.Buffer;
                     IPEndPoint remoteEp = result.RemoteEndPoint;
 
+                    // SECURITY: Buffer Overflow Protection
+                    // Reject oversized packets before further processing to prevent memory pressure or exploitation.
+                    if (payload.Length > 1024)
+                    {
+                        Debug.WriteLine($"[SECURITY_WARNING] Dropped oversized packet ({payload.Length} bytes) from {remoteEp}");
+                        continue;
+                    }
+
                     ProcessIncomingPacket(payload, remoteEp);
                 }
             }
