@@ -84,6 +84,9 @@ public partial class App : Application
             "Aegis-Link - Fatal Error",
             MessageBoxButton.OK,
             MessageBoxImage.Error);
+        
+        // Force terminate to prevent zombie process
+        Environment.Exit(-1);
     }
 
     protected override void OnExit(ExitEventArgs e)

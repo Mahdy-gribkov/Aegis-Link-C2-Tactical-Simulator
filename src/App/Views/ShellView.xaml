@@ -30,7 +30,7 @@
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="15,0">
                         <TextBlock Text="◢ AEGIS-LINK C2" FontSize="16" FontWeight="Bold" 
                                    Foreground="{DynamicResource CyberCyan}" FontFamily="{StaticResource MonoFont}"/>
-                        <TextBlock Text=" | v3.0.0" FontSize="12" Foreground="{DynamicResource TextMuted}" 
+                        <TextBlock Text=" | v3.0.1" FontSize="12" Foreground="{DynamicResource TextMuted}" 
                                    Margin="10,0,0,0" VerticalAlignment="Center"/>
                         <TextBlock Text=" | " Foreground="#333333" Margin="10,0"/>
                         <TextBlock Text="{Binding MissionClock}" FontSize="12" Foreground="{DynamicResource AlertAmber}" 
@@ -100,9 +100,9 @@
                 <Border VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="20"
                         Background="#88000000" CornerRadius="3" Padding="8" Opacity="0.7">
                     <TextBlock FontSize="9" Foreground="{DynamicResource TextMuted}" FontFamily="{StaticResource MonoFont}">
-                        <Run Text="FPS: "/><Run Text="{Binding Fps}"/>
-                        <Run Text=" | PPS: "/><Run Text="{Binding PacketsPerSecond}"/>
-                        <Run Text=" | BUILD: "/><Run Text="{Binding BuildVersion}"/>
+                        <Run Text="FPS: "/><Run Text="{Binding Fps, Mode=OneWay}"/>
+                        <Run Text=" | PPS: "/><Run Text="{Binding PacketsPerSecond, Mode=OneWay}"/>
+                        <Run Text=" | BUILD: "/><Run Text="{Binding BuildVersion, Mode=OneWay}"/>
                     </TextBlock>
                 </Border>
             </Grid>
@@ -150,7 +150,7 @@
                         <Ellipse x:Name="TxIndicator" Width="6" Height="6" Fill="#333333" Margin="0,0,5,0"/>
                         <TextBlock Text="TX" FontSize="9" Foreground="{DynamicResource TextMuted}" FontFamily="{StaticResource MonoFont}"/>
                     </StackPanel>
-                    <TextBlock Text="AEGIS-LINK C2 v3.0.0 | .NET 6.0 LTS" FontSize="9" Foreground="{DynamicResource TextMuted}" 
+                    <TextBlock Text="AEGIS-LINK C2 v3.0.1 | .NET 6.0 LTS" FontSize="9" Foreground="{DynamicResource TextMuted}" 
                                VerticalAlignment="Center" HorizontalAlignment="Center" FontFamily="{StaticResource MonoFont}"/>
                     <TextBlock Text="[~] Terminal | [F11] Fullscreen" FontSize="9" Foreground="{DynamicResource TextMuted}" 
                                HorizontalAlignment="Right" VerticalAlignment="Center" FontFamily="{StaticResource MonoFont}"/>
