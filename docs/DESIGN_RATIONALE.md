@@ -20,3 +20,6 @@ To guarantee mission integrity, Aegis-Link employs a **GitHub Actions CI/CD Pipe
 
 ## Cross-Platform Build Constraints
 The Aegis-Link C2 dashboard is built using **WPF (Windows Presentation Foundation)**. Due to the deep integration with the Windows Desktop Stack required for high-performance tactical rendering, a **Windows Runner** (`windows-latest`) is mandatory in the CI/CD pipeline. This ensures that the build environment has access to the necessary desktop SDKs and MSBuild components that are not available on Linux or macOS runners. CI/CD pipeline utilizes windows-latest runners to accommodate XAML compilation and WPF desktop workloads. Dependencies are strictly pinned to 6.x.x versions to maintain a validated baseline and prevent drift in air-gapped tactical environments.
+
+## XAML Resource Management
+Resource dictionaries utilize **MergedDictionaries** to resolve resource scope conflicts during UI composition. This pattern enables modular resource organization while maintaining proper lookup precedence for StaticResource bindings within the high-DPI Viewbox-scaled HUD layout.

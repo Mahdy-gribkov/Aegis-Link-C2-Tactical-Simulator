@@ -5,3 +5,11 @@ obj/
 *.user
 *.suo
 *.userprefs
+
+# Build artifacts
+publish/
+*.exe
+build_output*.txt
+
+# Internal documentation (not for public)
+docs/internal_dev_notes.md
