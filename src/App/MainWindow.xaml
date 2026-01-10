@@ -25,13 +25,34 @@
             </Grid.RowDefinitions>
 
             <Border Grid.Row="0" Background="#111111" BorderBrush="#00FFFF" BorderThickness="0,0,0,2">
-                <Grid Margin="20,0">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock Text="◢ AEGIS-LINK" FontSize="24" FontWeight="Bold" Foreground="#00FFFF" FontFamily="Consolas"/>
-                        <TextBlock Text=" | TACTICAL C2 INTERFACE" FontSize="18" Foreground="#888888" Margin="10,0,0,0" VerticalAlignment="Center"/>
-                    </StackPanel>
-                    <TextBlock Text="{StaticResource StatusNominal}" FontSize="14" Foreground="#00FF00" HorizontalAlignment="Right" VerticalAlignment="Center" FontFamily="Consolas"/>
-                </Grid>
+                <DockPanel>
+                    <Menu DockPanel.Dock="Top" Background="#111111" Foreground="#00FFFF" FontFamily="Consolas" FontSize="12">
+                        <MenuItem Header="_FILE" Foreground="#00FFFF">
+                            <MenuItem Header="Export Logs" Foreground="#E0E0E0"/>
+                            <Separator/>
+                            <MenuItem Header="Exit" Foreground="#E0E0E0" Click="MenuExit_Click"/>
+                        </MenuItem>
+                        <MenuItem Header="_VIEW" Foreground="#00FFFF">
+                            <MenuItem Header="Toggle Fullscreen" Foreground="#E0E0E0"/>
+                            <MenuItem Header="Theme: Night" Foreground="#E0E0E0" IsChecked="True"/>
+                        </MenuItem>
+                        <MenuItem Header="_COMMS" Foreground="#00FFFF">
+                            <MenuItem Header="Force Reconnect" Foreground="#E0E0E0"/>
+                            <MenuItem Header="Network Settings" Foreground="#E0E0E0"/>
+                        </MenuItem>
+                        <MenuItem Header="_HELP" Foreground="#00FFFF">
+                            <MenuItem Header="Field Manual" Foreground="#E0E0E0"/>
+                            <MenuItem Header="About Aegis-Link" Foreground="#E0E0E0"/>
+                        </MenuItem>
+                    </Menu>
+                    <Grid Margin="20,0">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="◢ AEGIS-LINK" FontSize="20" FontWeight="Bold" Foreground="#00FFFF" FontFamily="Consolas"/>
+                            <TextBlock Text=" | TACTICAL C2 INTERFACE v1.3.0" FontSize="14" Foreground="#888888" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <TextBlock Text="{StaticResource StatusNominal}" FontSize="12" Foreground="#00FF00" HorizontalAlignment="Right" VerticalAlignment="Center" FontFamily="Consolas"/>
+                    </Grid>
+                </DockPanel>
             </Border>
 
             <Grid Grid.Row="1" Margin="20">

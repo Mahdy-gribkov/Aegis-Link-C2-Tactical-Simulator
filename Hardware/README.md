@@ -18,48 +18,85 @@ The **Hardware** directory contains the embedded firmware for the M5Stack Cardpu
 
 ---
 
-## Communication Protocol
+## Step-by-Step Deployment Guide
 
-### UDP Telemetry Stream
-- **Port:** 5000 (configurable)
-- **Frame Size:** 28 bytes
-- **Frame Rate:** 10 Hz (configurable)
+### Step 1: Install Development Environment
 
-### Binary Frame Structure
+1. **Download** [Visual Studio Code](https://code.visualstudio.com/)
+2. **Install** the PlatformIO IDE extension:
+   - Open VS Code → Extensions (Ctrl+Shift+X)
+   - Search "PlatformIO IDE"
+   - Click Install
+3. **Restart** VS Code
+
+### Step 2: Open Project
+
+1. In VS Code, click **File → Open Folder**
+2. Navigate to `Aegis-Link-C2-Tactical-Simulator/Hardware/`
+3. Click **Select Folder**
+4. Wait for PlatformIO to initialize (status bar shows progress)
+
+### Step 3: Configure WiFi Credentials
+
+1. Open `main.cpp`
+2. Locate the WiFi configuration section:
+   ```cpp
+   const char* WIFI_SSID = "AEGIS-LINK";
+   const char* WIFI_PASS = "your-password-here";
+   const char* TARGET_IP = "192.168.4.1";
+   ```
+3. Modify as needed for your network
+
+### Step 4: Flash the Cardputer
+
+1. Connect M5Stack Cardputer via USB-C
+2. Click the **PlatformIO: Upload** button (→ icon in status bar)
+3. Or run from terminal:
+   ```powershell
+   cd Hardware
+   pio run --target upload
+   ```
+4. Wait for "SUCCESS" message
+
+### Step 5: Connect Command Station
+
+1. On your Windows PC, open **WiFi Settings**
+2. Connect to network: `AEGIS-LINK`
+3. Enter the password configured in Step 3
+4. Launch `AegisLink.App.exe`
+5. Verify connection indicator shows **◉ OPERATIONAL**
+
+---
+
+## Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| **Upload fails** | Hold BOOT button while connecting USB |
+| **No WiFi network** | Check Cardputer display for AP status |
+| **No telemetry** | Verify IP address matches in main.cpp |
+| **Handshake fails** | Check XOR key matches in both PC and firmware |
+
+---
+
+## Binary Protocol Reference
+
+### TelemetryFrame Structure (28 bytes)
 ```cpp
 struct TelemetryFrame {
-    int32_t  BatteryLevel;    // 4 bytes
-    float    SignalStrength;  // 4 bytes
-    double   Latitude;        // 8 bytes
-    double   Longitude;       // 8 bytes
-    uint32_t StatusCodes;     // 4 bytes
-};                            // Total: 28 bytes (Pack=1)
+    int32_t  BatteryLevel;    // Offset 0,  4 bytes
+    float    SignalStrength;  // Offset 4,  4 bytes
+    double   Latitude;        // Offset 8,  8 bytes
+    double   Longitude;       // Offset 16, 8 bytes
+    uint32_t StatusCodes;     // Offset 24, 4 bytes
+};
 ```
 
----
-
-## Security Handshake
-
-Before telemetry transmission begins, the Cardputer must complete a challenge-response authentication:
-
-1. **Challenge:** PC sends random 8-bit value
-2. **Response:** Cardputer responds with `challenge XOR 0x42`
-3. **Lock:** PC validates response and locks endpoint
-
----
-
-## Firmware Build
-
-### Prerequisites
-- [PlatformIO](https://platformio.org/) or Arduino IDE
-- ESP32 board support package
-- M5Stack Cardputer library
-
-### Build Commands
-```bash
-cd Hardware
-pio run
-pio upload
+### Handshake Sequence
+```
+PC → Cardputer: [CHALLENGE_BYTE]
+Cardputer → PC: [CHALLENGE_BYTE XOR 0x42]
+PC: Validates response, locks endpoint
 ```
 
 ---
@@ -68,7 +105,8 @@ pio upload
 
 ```
 Hardware/
-├── main.cpp          # Primary firmware implementation
+├── main.cpp          # Firmware implementation
+├── platformio.ini    # Build configuration
 └── README.md         # This documentation
 ```
 

@@ -1,101 +1,166 @@
 # AEGIS-LINK | Tactical C2 Interface
 
+```
+    ╔═══════════════════════════════════════════════════════════════╗
+    ║     █████╗ ███████╗ ██████╗ ██╗███████╗    ██╗     ██╗███╗   ██╗██╗  ██╗    ║
+    ║    ██╔══██╗██╔════╝██╔════╝ ██║██╔════╝    ██║     ██║████╗  ██║██║ ██╔╝    ║
+    ║    ███████║█████╗  ██║  ███╗██║███████╗    ██║     ██║██╔██╗ ██║█████╔╝     ║
+    ║    ██╔══██║██╔══╝  ██║   ██║██║╚════██║    ██║     ██║██║╚██╗██║██╔═██╗     ║
+    ║    ██║  ██║███████╗╚██████╔╝██║███████║    ███████╗██║██║ ╚████║██║  ██╗    ║
+    ║    ╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝╚══════╝    ╚══════╝╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝    ║
+    ║                                                                             ║
+    ║              TACTICAL COMMAND & CONTROL INTERFACE                           ║
+    ╚═══════════════════════════════════════════════════════════════╝
+```
+
 ![Build Status](https://github.com/Mahdy-gribkov/Aegis-Link-C2-Tactical-Simulator/actions/workflows/tactical-ci-cd.yml/badge.svg)
+[![Release](https://img.shields.io/github/v/release/Mahdy-gribkov/Aegis-Link-C2-Tactical-Simulator?color=00FFFF)](https://github.com/Mahdy-gribkov/Aegis-Link-C2-Tactical-Simulator/releases/latest)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![.NET](https://img.shields.io/badge/.NET-6.0%20LTS-512BD4)](https://dotnet.microsoft.com/)
 
-[![Download Latest Release](https://img.shields.io/badge/Download-Latest%20Release-00FFFF?style=for-the-badge&logo=github)](https://github.com/Mahdy-gribkov/Aegis-Link-C2-Tactical-Simulator/releases/latest)
-
-**Aegis-Link** is a defense-grade Command & Control (C2) tactical interface built on .NET 6.0 LTS. It provides secure, low-latency telemetry integration between desktop command stations and M5Stack Cardputer field hardware.
-
----
-
-## Version History
-
-| Version | Date | Status | Description |
-|---------|------|--------|-------------|
-| **1.1.0.0** | 2026-01-10 | **STABLE - CURRENT** | XAML hotfix, strict semantic versioning, professional HUD with cyan accent |
-| 1.0.0 | 2026-01-10 | Superseded | Initial release - Core C2 functionality, binary protocol, SQLite persistence |
+[![Download Latest Release](https://img.shields.io/badge/⬇_Download-Latest_Release-00FFFF?style=for-the-badge&logo=github)](https://github.com/Mahdy-gribkov/Aegis-Link-C2-Tactical-Simulator/releases/latest)
 
 ---
 
-## Mission Capabilities
+## Mission Profile
 
-### Real-Time Telemetry Processing
-- **Zero-Copy Deserialization:** Binary protocol with `Pack=1` memory alignment for sub-millisecond frame processing
-- **Dual-Mode Operation:** Seamless switching between live hardware link and virtual simulation
-- **Thread-Safe UI Marshalling:** Asynchronous event streams with `Dispatcher.BeginInvoke` for zero-latency rendering
+**Aegis-Link** is a defense-grade Command & Control (C2) tactical interface for real-time telemetry integration between desktop command stations and M5Stack Cardputer field hardware.
 
-### Security Architecture
-- **Challenge-Response Handshake:** Mandatory XOR-based authentication preventing unauthorized node intrusion
-- **Endpoint Locking:** Single-source UDP binding after successful handshake
-- **Mission Black Box:** SQLite-based event sourcing for post-mission analysis and audit trails
+| Capability | Description |
+|------------|-------------|
+| **Binary Protocol** | Zero-copy deserialization with `Pack=1` memory alignment |
+| **Dual-Mode** | Seamless switching between live hardware and simulation |
+| **Persistence** | SQLite-based "Black Box" mission logging |
+| **Security** | XOR challenge-response endpoint authentication |
 
-### Tactical Interface
-- **High-Contrast HUD:** Cyan-on-black design optimized for ruggedized laptop displays
-- **Scalable Viewbox:** Resolution-independent rendering from 1024x768 to 4K
-- **Monospace Telemetry:** Consolas font family for precise numerical readability
+---
+
+## System Architecture
+
+```mermaid
+graph LR
+    subgraph Command Station
+        A[Aegis-Link.App] --> B[UdpLinkService]
+        A --> C[MissionRepository]
+        C --> D[(SQLite DB)]
+    end
+    
+    subgraph Field Hardware
+        E[M5Stack Cardputer] --> F[ESP32-S3]
+        F --> G[WiFi Module]
+    end
+    
+    B <-->|UDP Port 5000| G
+    
+    style A fill:#0A0A0A,stroke:#00FFFF,color:#00FFFF
+    style E fill:#0A0A0A,stroke:#FFB000,color:#FFB000
+```
+
+---
+
+## Operational Guide
+
+### Simulation Mode (No Hardware Required)
+
+1. **Download** the latest release from [Releases](https://github.com/Mahdy-gribkov/Aegis-Link-C2-Tactical-Simulator/releases/latest)
+2. **Extract** `AegisLink-Tactical-vX.X.X.zip`
+3. **Run** `AegisLink.App.exe`
+4. **Enable** "SIMULATION MODE" toggle in the UI
+5. **Observe** synthetic telemetry data streaming to the HUD
+
+### Field Deployment (Hardware Required)
+
+#### Prerequisites
+- M5Stack Cardputer with ESP32-S3
+- USB-C cable for flashing
+- VS Code + PlatformIO extension
+
+#### Deployment Steps
+```powershell
+# 1. Flash the Cardputer
+cd Hardware
+pio run --target upload
+
+# 2. Connect to Cardputer WiFi
+# Network: AEGIS-LINK
+# Password: (configured in main.cpp)
+
+# 3. Launch Command Station
+./AegisLink.App.exe
+
+# 4. Verify Connection
+# Status indicator should show "CONNECTED"
+```
+
+---
+
+## Key Features
+
+### CI/CD Pipeline
+- **Automated Testing** on every push
+- **NuGet Caching** for 50% faster builds
+- **Self-Contained Releases** with single-file deployment
+
+### Binary Determinism
+```csharp
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
+public readonly struct TelemetryFrame
+{
+    public readonly int BatteryLevel;      // 4 bytes
+    public readonly float SignalStrength;  // 4 bytes
+    public readonly double Latitude;       // 8 bytes
+    public readonly double Longitude;      // 8 bytes
+    public readonly uint StatusCodes;      // 4 bytes
+}                                          // Total: 28 bytes
+```
+
+### Mission Persistence
+All telemetry events are logged to an SQLite database for post-mission analysis and audit trails.
 
 ---
 
 ## Hardware Requirements
 
-### Command Station (PC)
-- **OS:** Windows 10/11 (64-bit)
-- **Runtime:** .NET 6.0 SDK or self-contained deployment
-- **Network:** UDP port 5000 (configurable)
-- **Display:** Minimum 1024x768, recommended 1920x1080+
-
-### Field Hardware (M5Stack Cardputer)
-- **MCU:** ESP32-S3
-- **Connectivity:** WiFi 802.11 b/g/n
-- **Firmware:** Custom C++ implementation (see `Hardware/main.cpp`)
-- **Power:** USB-C or battery (3.7V LiPo)
+| Component | Specification |
+|-----------|---------------|
+| **Command Station** | Windows 10/11 x64, UDP Port 5000 |
+| **Field Unit** | M5Stack Cardputer (ESP32-S3), WiFi |
+| **Display** | Minimum 1024x768, Recommended 1920x1080 |
 
 ---
 
-## Quick Start
+## Build From Source
 
-### Self-Contained Deployment
-1. Download the latest release from [GitHub Actions Artifacts](https://github.com/Mahdy-gribkov/Aegis-Link-C2-Tactical-Simulator/actions)
-2. Extract `AegisLink-Tactical-Release.zip`
-3. Run `AegisLink.App.exe` (no installation required)
-
-### Build from Source
 ```powershell
 git clone https://github.com/Mahdy-gribkov/Aegis-Link-C2-Tactical-Simulator.git
 cd Aegis-Link-C2-Tactical-Simulator
 dotnet restore
 dotnet build --configuration Release
-dotnet run --project App/AegisLink.App.csproj
+dotnet run --project src/App/AegisLink.App.csproj
 ```
-
-### Run Tests
-```powershell
-dotnet test --configuration Release
-```
-
----
-
-## Security Architecture
-
-### Binary Protocol Determinism
-The `TelemetryFrame` struct uses `StructLayout(LayoutKind.Sequential, Pack=1)` to ensure bit-for-bit compatibility between .NET (C#) and embedded C++ implementations. This eliminates JSON overhead and enables zero-copy memory mapping.
-
-### XOR Challenge-Response
-1. PC sends random 8-bit challenge to Cardputer
-2. Cardputer responds with `challenge XOR 0x42`
-3. PC verifies response and locks endpoint
-4. All subsequent telemetry frames validated against locked source
-
-See [SECURITY.md](docs/SECURITY.md) for detailed protocol specification.
 
 ---
 
 ## Documentation
 
-- **[Design Rationale](docs/DESIGN_RATIONALE.md)** - Architectural decisions and engineering trade-offs
-- **[Security Protocol](docs/SECURITY.md)** - XOR handshake and endpoint locking
-- **[Architecture Guide](docs/ARCHITECTURE.md)** - Binary determinism, async patterns, MVVM implementation
-- **[Dependency Manifest](DEPENDENCY_MANIFEST.md)** - Complete dependency list with licenses
+| Document | Description |
+|----------|-------------|
+| [Design Rationale](docs/DESIGN_RATIONALE.md) | Architectural decisions |
+| [Security Protocol](docs/SECURITY.md) | XOR handshake specification |
+| [Architecture Guide](docs/ARCHITECTURE.md) | Binary determinism, MVVM |
+| [Hardware Guide](Hardware/README.md) | Cardputer firmware flashing |
+| [Dependency Manifest](docs/DEPENDENCY_MANIFEST.md) | Licenses |
+
+---
+
+## Version History
+
+| Version | Status | Description |
+|---------|--------|-------------|
+| **1.3.0** | **CURRENT** | Field Manual documentation, UX overhaul |
+| 1.2.0 | Stable | Optimized CI/CD with NuGet caching |
+| 1.1.0 | Superseded | XAML hotfix, semantic versioning |
+| 1.0.0 | Superseded | Initial release |
 
 ---
 
@@ -104,12 +169,6 @@ See [SECURITY.md](docs/SECURITY.md) for detailed protocol specification.
 **Mahdy Gribkov**  
 Lead Systems Architect  
 [GitHub](https://github.com/Mahdy-gribkov)
-
----
-
-## License
-
-This project is provided for educational and tactical simulation purposes. All dependencies are licensed under permissive open-source licenses (MIT, Apache 2.0). See [docs/DEPENDENCY_MANIFEST.md](docs/DEPENDENCY_MANIFEST.md) for complete license information.
 
 ---
 
