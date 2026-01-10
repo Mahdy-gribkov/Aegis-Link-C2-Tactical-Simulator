@@ -1,6 +1,4 @@
-﻿/* Project Aegis-Link | Tactical C2 Interface | Core Engineering by Mahdy Gribkov */
-
-<Window x:Class="AegisLink.App.MainWindow"
+﻿<Window x:Class="AegisLink.App.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:converters="clr-namespace:AegisLink.App.Converters"
@@ -22,7 +20,6 @@
                 <RowDefinition Height="30"/>
             </Grid.RowDefinitions>
 
-            <!-- Header HUD -->
             <Border Grid.Row="0" Background="#111111" BorderBrush="#00FFFF" BorderThickness="0,0,0,2">
                 <Grid Margin="20,0">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -33,14 +30,12 @@
                 </Grid>
             </Border>
 
-            <!-- Main HUD Grid -->
             <Grid Grid.Row="1" Margin="20">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Telemetry Panel -->
                 <Border Grid.Column="0" Background="#0F0F0F" BorderBrush="#00FFFF" BorderThickness="1" Margin="0,0,10,0" Padding="20">
                     <StackPanel>
                         <TextBlock Text="▸ TELEMETRY DATA" FontSize="16" Foreground="#00FFFF" Margin="0,0,0,20" FontFamily="Consolas"/>
@@ -68,7 +63,6 @@
                     </StackPanel>
                 </Border>
 
-                <!-- System Health Panel -->
                 <Border Grid.Column="1" Background="#0F0F0F" BorderBrush="#00FFFF" BorderThickness="1" Margin="10,0,0,0" Padding="20">
                     <StackPanel>
                         <TextBlock Text="▸ SYSTEM HEALTH" FontSize="16" Foreground="#00FFFF" Margin="0,0,0,20" FontFamily="Consolas"/>
@@ -110,7 +104,6 @@
                 </Border>
             </Grid>
 
-            <!-- Command Log -->
             <Border Grid.Row="2" Background="#0A0A0A" BorderBrush="#00FFFF" BorderThickness="0,1,0,0" Padding="20">
                 <DockPanel>
                     <TextBlock DockPanel.Dock="Top" Text="▸ COMMAND LOG" FontSize="14" Foreground="#00FFFF" Margin="0,0,0,10" FontFamily="Consolas"/>
@@ -127,11 +120,10 @@
                 </DockPanel>
             </Border>
 
-            <!-- Footer Status Bar -->
             <Border Grid.Row="3" Background="#111111" BorderBrush="#00FFFF" BorderThickness="0,1,0,0">
                 <Grid Margin="20,0">
                     <TextBlock Text="{StaticResource SystemStatus}" FontSize="10" Foreground="#666666" VerticalAlignment="Center" FontFamily="Consolas"/>
-                    <TextBlock Text="SYSTEM STATUS: NOMINAL | OPS-TECH: M. GRIBKOV" FontSize="10" Foreground="#00FFFF" HorizontalAlignment="Right" VerticalAlignment="Center" FontFamily="Consolas"/>
+                    <TextBlock Text="SYSTEM ID: AEGIS-LINK | OPERATOR: M. GRIBKOV" FontSize="10" Foreground="#5500FFFF" HorizontalAlignment="Right" VerticalAlignment="Center" FontFamily="Consolas"/>
                 </Grid>
             </Border>
         </Grid>

@@ -1,14 +1,14 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=System.Runtime">
     
-    <!-- UI Labels for Localization -->
-    <System:String x:Key="StatusNominal">◉ OPERATIONAL</System:String>
-    <System:String x:Key="LabelAzimuth">AZIMUTH (°)</System:String>
-    <System:String x:Key="LabelElevation">ELEVATION (°)</System:String>
-    <System:String x:Key="LabelBattery">BATTERY</System:String>
-    <System:String x:Key="LabelSignal">SIGNAL (dB)</System:String>
-    <System:String x:Key="ButtonSendPing">◢ SEND PING</System:String>
-    <System:String x:Key="ButtonSimulation">SIMULATION MODE</System:String>
-    <System:String x:Key="SystemStatus">AEGIS-LINK v1.0.0 | .NET 6.0 LTS</System:String>
+    <sys:String x:Key="StatusNominal">◉ OPERATIONAL</sys:String>
+    <sys:String x:Key="LabelAzimuth">AZIMUTH (°)</sys:String>
+    <sys:String x:Key="LabelElevation">ELEVATION (°)</sys:String>
+    <sys:String x:Key="LabelBattery">BATTERY</sys:String>
+    <sys:String x:Key="LabelSignal">SIGNAL (dB)</sys:String>
+    <sys:String x:Key="ButtonSendPing">◢ SEND PING</sys:String>
+    <sys:String x:Key="ButtonSimulation">SIMULATION MODE</sys:String>
+    <sys:String x:Key="SystemStatus">AEGIS-LINK v1.1.0.0 | .NET 6.0 LTS</sys:String>
     
 </ResourceDictionary>

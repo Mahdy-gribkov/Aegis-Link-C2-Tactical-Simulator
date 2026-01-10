@@ -6,6 +6,15 @@
 
 ---
 
+## Version History
+
+| Version | Date | Description |
+|---------|------|-------------|
+| **1.1.0.0** | 2026-01-10 | **Stable Release** - XAML hotfix, strict semantic versioning, professional HUD with cyan accent |
+| 1.0.0 | 2026-01-10 | Initial release - Core C2 functionality, binary protocol, SQLite persistence |
+
+---
+
 ## Mission Capabilities
 
 ### Real-Time Telemetry Processing

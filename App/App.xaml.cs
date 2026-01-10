@@ -10,6 +10,8 @@ namespace AegisLink.App
     /// </summary>
     public partial class App : Application
     {
+        public const string Version = "1.1.0.0";
+        
         private UdpLinkService? _udpLinkService;
         private MissionRepository? _missionRepository;
 
