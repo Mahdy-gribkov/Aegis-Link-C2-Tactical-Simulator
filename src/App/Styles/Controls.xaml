@@ -1,0 +1,86 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- MenuItem Style (High Contrast Text) -->
+    <Style TargetType="MenuItem">
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="FontFamily" Value="Consolas"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Style.Triggers>
+            <Trigger Property="IsHighlighted" Value="True">
+                <Setter Property="Foreground" Value="Black"/>
+                <Setter Property="Background" Value="#00FFFF"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Button Base Style -->
+    <Style x:Key="TacticalButton" TargetType="Button">
+        <Setter Property="FontFamily" Value="Consolas"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}" 
+                            BorderBrush="{TemplateBinding BorderBrush}" 
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="3" Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ToggleButton Style -->
+    <Style x:Key="TacticalToggle" TargetType="ToggleButton">
+        <Setter Property="FontFamily" Value="Consolas"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToggleButton">
+                    <Border Background="{TemplateBinding Background}" 
+                            BorderBrush="{TemplateBinding BorderBrush}" 
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="3" Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsChecked" Value="True">
+                <Setter Property="Background" Value="#003333"/>
+                <Setter Property="Foreground" Value="#00FFFF"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- TextBox Style -->
+    <Style x:Key="TerminalTextBox" TargetType="TextBox">
+        <Setter Property="Background" Value="#0A0A0A"/>
+        <Setter Property="Foreground" Value="#00FF00"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="FontFamily" Value="Consolas"/>
+        <Setter Property="CaretBrush" Value="#00FF00"/>
+    </Style>
+
+    <!-- ListBox Style -->
+    <Style x:Key="LogListBox" TargetType="ListBox">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Foreground" Value="#00FF00"/>
+        <Setter Property="FontFamily" Value="Consolas"/>
+        <Setter Property="FontSize" Value="11"/>
+    </Style>
+
+    <!-- Card Border Style -->
+    <Style x:Key="CardStyle" TargetType="Border">
+        <Setter Property="Background" Value="#0F0F0F"/>
+        <Setter Property="CornerRadius" Value="5"/>
+        <Setter Property="Padding" Value="15"/>
+        <Setter Property="Margin" Value="5"/>
+    </Style>
+
+</ResourceDictionary>
