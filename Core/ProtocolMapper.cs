@@ -1,3 +1,5 @@
+/* Project Aegis-Link | Tactical C2 Interface | Core Engineering by Mahdy Gribkov */
+
 using System;
 using System.Runtime.InteropServices;
 
