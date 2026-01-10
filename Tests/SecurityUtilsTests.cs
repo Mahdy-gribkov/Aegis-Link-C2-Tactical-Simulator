@@ -11,7 +11,7 @@ namespace AegisLink.Tests
             // Arrange
             byte[] challenge = new byte[] { 0xAA };
             byte key = 0x42;
-            byte expected = (byte)(0xFF ^ key); // WRONG: Deliberately broken for CI demo
+            byte expected = (byte)(0xAA ^ key); // FIXED: Demonstrating pipeline recovery after failure detection
 
             // Act
             byte[] response = SecurityUtils.CalculateXorResponse(challenge);
