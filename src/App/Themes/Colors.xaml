@@ -1,0 +1,22 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Core Glass Colors -->
+    <SolidColorBrush x:Key="CyberGreen" Color="#00FF00"/>
+    <SolidColorBrush x:Key="CyberCyan" Color="#00FFFF"/>
+    <SolidColorBrush x:Key="AlertRed" Color="#FF4444"/>
+    <SolidColorBrush x:Key="AlertAmber" Color="#FFB000"/>
+    <SolidColorBrush x:Key="GlassBlack" Color="#E6050505"/>
+    <SolidColorBrush x:Key="GlassPanel" Color="#CC0A0A0A"/>
+    <SolidColorBrush x:Key="GlassBorder" Color="#333333"/>
+    
+    <!-- Text Colors -->
+    <SolidColorBrush x:Key="TextPrimary" Color="#E0E0E0"/>
+    <SolidColorBrush x:Key="TextSecondary" Color="#888888"/>
+    <SolidColorBrush x:Key="TextMuted" Color="#666666"/>
+
+    <!-- Radar Colors -->
+    <SolidColorBrush x:Key="RadarGrid" Color="#1A00FF00"/>
+    <SolidColorBrush x:Key="RadarBlip" Color="#00FF00"/>
+
+</ResourceDictionary>

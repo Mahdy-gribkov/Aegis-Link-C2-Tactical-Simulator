@@ -1,155 +1,114 @@
-# AEGIS-LINK | Tactical C2 Interface
+# Aegis-Link C2 v3.0.0
 
 ```
-    ╔═══════════════════════════════════════════════════════════════╗
-    ║     █████╗ ███████╗ ██████╗ ██╗███████╗    ██╗     ██╗███╗   ██╗██╗  ██╗    ║
-    ║    ██╔══██╗██╔════╝██╔════╝ ██║██╔════╝    ██║     ██║████╗  ██║██║ ██╔╝    ║
-    ║    ███████║█████╗  ██║  ███╗██║███████╗    ██║     ██║██╔██╗ ██║█████╔╝     ║
-    ║    ██╔══██║██╔══╝  ██║   ██║██║╚════██║    ██║     ██║██║╚██╗██║██╔═██╗     ║
-    ║    ██║  ██║███████╗╚██████╔╝██║███████║    ███████╗██║██║ ╚████║██║  ██╗    ║
-    ║    ╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝╚══════╝    ╚══════╝╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝    ║
-    ║                                                                             ║
-    ║              TACTICAL COMMAND & CONTROL INTERFACE                           ║
-    ╚═══════════════════════════════════════════════════════════════╝
+    █████╗ ███████╗ ██████╗ ██╗███████╗    ██╗     ██╗███╗   ██╗██╗  ██╗
+   ██╔══██╗██╔════╝██╔════╝ ██║██╔════╝    ██║     ██║████╗  ██║██║ ██╔╝
+   ███████║█████╗  ██║  ███╗██║███████╗    ██║     ██║██╔██╗ ██║█████╔╝ 
+   ██╔══██║██╔══╝  ██║   ██║██║╚════██║    ██║     ██║██║╚██╗██║██╔═██╗ 
+   ██║  ██║███████╗╚██████╔╝██║███████║    ███████╗██║██║ ╚████║██║  ██╗
+   ╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝╚══════╝    ╚══════╝╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝
+                    TACTICAL C2 CONSOLE | v3.0.0
 ```
 
-![Build Status](https://github.com/Mahdy-gribkov/Aegis-Link-C2-Tactical-Simulator/actions/workflows/tactical-ci-cd.yml/badge.svg)
-[![Release](https://img.shields.io/github/v/release/Mahdy-gribkov/Aegis-Link-C2-Tactical-Simulator?color=00FFFF)](https://github.com/Mahdy-gribkov/Aegis-Link-C2-Tactical-Simulator/releases/latest)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![.NET](https://img.shields.io/badge/.NET-6.0%20LTS-512BD4)](https://dotnet.microsoft.com/)
-
-[![Download Latest Release](https://img.shields.io/badge/⬇_Download-Latest_Release-00FFFF?style=for-the-badge&logo=github)](https://github.com/Mahdy-gribkov/Aegis-Link-C2-Tactical-Simulator/releases/latest)
+**Classification:** UNCLASSIFIED // PUBLIC RELEASE  
+**Lead Systems Architect:** Mahdy Gribkov
 
 ---
 
-## Mission Profile
+## Getting Started
 
-**Aegis-Link** is a defense-grade Command & Control (C2) tactical interface for real-time telemetry integration between desktop command stations and M5Stack Cardputer field hardware.
+### UDP Listener
+The application listens for UDP packets on **Port 5555** (configurable).
 
-| Capability | Description |
-|------------|-------------|
-| **Binary Protocol** | Zero-copy deserialization with `Pack=1` memory alignment |
-| **Dual-Mode** | Seamless switching between live hardware and simulation |
-| **Persistence** | SQLite-based "Black Box" mission logging |
-| **Security** | XOR challenge-response endpoint authentication |
+```powershell
+# Test with PowerShell
+$udp = New-Object System.Net.Sockets.UdpClient
+$udp.Connect("127.0.0.1", 5555)
+$bytes = [Text.Encoding]::ASCII.GetBytes('{"type":"ping","val":90}')
+$udp.Send($bytes, $bytes.Length)
+```
+
+### Launch
+1. Download `AegisLink.App.exe` from Releases
+2. Run directly (single-file, no extraction)
+3. Press `~` to open terminal, `F11` for fullscreen
 
 ---
 
-## System Architecture
+## Architecture
 
 ```mermaid
-graph LR
-    subgraph Command Station
-        A[Aegis-Link.App] --> B[UdpLinkService]
-        A --> C[MissionRepository]
-        C --> D[(SQLite DB)]
+graph TB
+    subgraph UI["ShellView (Glass Cockpit)"]
+        Radar[Radar Canvas]
+        HUD[Status HUD]
+        Term[Terminal]
     end
     
-    subgraph Field Hardware
-        E[M5Stack Cardputer] --> F[ESP32-S3]
-        F --> G[WiFi Module]
+    subgraph VM["ShellViewModel"]
+        State[ApplicationState]
+        Cmds[Commands]
     end
     
-    B <-->|UDP Port 5000| G
+    subgraph Services
+        UDP[UdpService]
+        Scen[ScenarioService]
+        Log[FileLogger]
+        Cfg[ConfigService]
+    end
     
-    style A fill:#0A0A0A,stroke:#00FFFF,color:#00FFFF
-    style E fill:#0A0A0A,stroke:#FFB000,color:#FFB000
+    UI --> VM
+    VM --> Services
 ```
+
+### Key Components
+| Component | Purpose |
+|-----------|---------|
+| `ShellView` | Glass Cockpit UI with full-screen radar |
+| `ShellViewModel` | State machine, commands, telemetry |
+| `ScenarioService` | Simulation traffic patterns |
+| `CommandTokenizer` | Regex parsing for terminal commands |
 
 ---
 
-## Operational Guide
+## Keyboard Shortcuts
 
-### Simulation Mode (No Hardware Required)
+| Key | Action |
+|-----|--------|
+| `~` | Toggle Terminal |
+| `F11` | Toggle Fullscreen |
+| `Esc` | Close Terminal |
+| `Ctrl+S` | Capture Snapshot |
 
-1. **Download** the latest release from [Releases](https://github.com/Mahdy-gribkov/Aegis-Link-C2-Tactical-Simulator/releases/latest)
-2. **Extract** `AegisLink-Tactical-vX.X.X.zip`
-3. **Run** `AegisLink.App.exe`
-4. **Enable** "SIMULATION MODE" toggle in the UI
-5. **Observe** synthetic telemetry data streaming to the HUD
+---
 
-### Field Deployment (Hardware Required)
+## Terminal Commands
 
-#### Prerequisites
-- M5Stack Cardputer with ESP32-S3
-- USB-C cable for flashing
-- VS Code + PlatformIO extension
+| Command | Description |
+|---------|-------------|
+| `scan` | Start UDP listener / simulation |
+| `stop` | Stop listener |
+| `status` | Show current state |
+| `export -log` | Save logs to Documents |
+| `clear` | Clear terminal |
+| `help` | Show commands |
 
-#### Deployment Steps
+---
+
+## Troubleshooting
+
+### UDP Port Blocked
 ```powershell
-# 1. Flash the Cardputer
-cd Hardware
-pio run --target upload
+# Check if port 5555 is in use
+netstat -an | findstr 5555
 
-# 2. Connect to Cardputer WiFi
-# Network: AEGIS-LINK
-# Password: (configured in main.cpp)
-
-# 3. Launch Command Station
-./AegisLink.App.exe
-
-# 4. Verify Connection
-# Status indicator should show "CONNECTED"
+# Open Windows Firewall
+New-NetFirewallRule -DisplayName "AegisLink UDP" -Direction Inbound -Protocol UDP -LocalPort 5555 -Action Allow
 ```
 
----
-
-## Key Features
-
-### CI/CD Pipeline
-- **Automated Testing** on every push
-- **NuGet Caching** for 50% faster builds
-- **Self-Contained Releases** with single-file deployment
-
-### Binary Determinism
-```csharp
-[StructLayout(LayoutKind.Sequential, Pack = 1)]
-public readonly struct TelemetryFrame
-{
-    public readonly int BatteryLevel;      // 4 bytes
-    public readonly float SignalStrength;  // 4 bytes
-    public readonly double Latitude;       // 8 bytes
-    public readonly double Longitude;      // 8 bytes
-    public readonly uint StatusCodes;      // 4 bytes
-}                                          // Total: 28 bytes
-```
-
-### Mission Persistence
-All telemetry events are logged to an SQLite database for post-mission analysis and audit trails.
-
----
-
-## Hardware Requirements
-
-| Component | Specification |
-|-----------|---------------|
-| **Command Station** | Windows 10/11 x64, UDP Port 5000 |
-| **Field Unit** | M5Stack Cardputer (ESP32-S3), WiFi |
-| **Display** | Minimum 1024x768, Recommended 1920x1080 |
-
----
-
-## Build From Source
-
-```powershell
-git clone https://github.com/Mahdy-gribkov/Aegis-Link-C2-Tactical-Simulator.git
-cd Aegis-Link-C2-Tactical-Simulator
-dotnet restore
-dotnet build --configuration Release
-dotnet run --project src/App/AegisLink.App.csproj
-```
-
----
-
-## Documentation
-
-| Document | Description |
-|----------|-------------|
-| [Design Rationale](docs/DESIGN_RATIONALE.md) | Architectural decisions |
-| [Security Protocol](docs/SECURITY.md) | XOR handshake specification |
-| [Architecture Guide](docs/ARCHITECTURE.md) | Binary determinism, MVVM |
-| [Hardware Guide](Hardware/README.md) | Cardputer firmware flashing |
-| [Dependency Manifest](docs/DEPENDENCY_MANIFEST.md) | Licenses |
+### Application Won't Start
+1. Check `%LOCALAPPDATA%\AegisLink\logs\crash.log`
+2. Ensure .NET 6.0 is installed (or use self-contained build)
 
 ---
 
@@ -157,23 +116,13 @@ dotnet run --project src/App/AegisLink.App.csproj
 
 | Version | Status | Description |
 |---------|--------|-------------|
-| **2.0.0** | **CURRENT** | Phoenix overhaul: modular UI, active sim, trimming, audio |
-| 1.6.0 | Stable | Flagship UI overhaul, radar visualization, security hardening |
-| 1.5.0 | Stable | Active theming engine (Day/Night modes), cleaner artifacts |
-| 1.4.0 | Stable | Universal protocol documentation, single-file compression |
-| 1.3.0 | Stable | Field Manual documentation, UX overhaul |
-| 1.2.0 | Stable | Optimized CI/CD with NuGet caching |
-| 1.1.0 | Superseded | XAML hotfix, semantic versioning |
-| 1.0.0 | Superseded | Initial release |
+| **3.0.0** | **CURRENT** | Flagship refactor: DI, CommunityToolkit.Mvvm, Glass Cockpit |
+| 2.1.0 | Stable | Active radar/graph animation |
+| 2.0.2 | Stable | XAML event compatibility fix |
+| 1.6.0 | Superseded | Flagship UI overhaul |
 
 ---
 
-## Maintainer
+## License
 
-**Mahdy Gribkov**  
-Lead Systems Architect  
-[GitHub](https://github.com/Mahdy-gribkov)
-
----
-
-*AEGIS-LINK | Defense-Grade Tactical Awareness*
+MIT License. See [LICENSE](LICENSE) for details.

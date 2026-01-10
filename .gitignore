@@ -1,15 +1,23 @@
-# .NET
-bin/
-obj/
+# IDE
 .vs/
 *.user
 *.suo
-*.userprefs
 
-# Build artifacts
+# Build
+bin/
+obj/
 publish/
 *.exe
-build_output*.txt
+*.pdb
 
-# Internal documentation (not for public)
-docs/internal_dev_notes.md
+# Private docs
+docs/private/
+InterviewPrep/
+
+# Logs
+*.log
+crash.log
+
+# Temp
+**/internal_notes/
+*.tmp
