@@ -2,7 +2,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Core\AegisLink.Core.csproj" />
-    <ProjectReference Include="..\Persistence\AegisLink.Persistence.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -27,14 +26,6 @@
   </PropertyGroup>
 
   <!-- Git Hash Injection -->
-  <Target Name="SetSourceRevisionId" BeforeTargets="InitializeSourceControlInformation">
-    <Exec Command="git rev-parse --short HEAD" ConsoleToMSBuild="true" IgnoreExitCode="true">
-      <Output TaskParameter="ConsoleOutput" PropertyName="SourceRevisionId" />
-    </Exec>
-  </Target>
-  <PropertyGroup>
-    <SourceRevisionId Condition="'$(SourceRevisionId)' == ''">unknown</SourceRevisionId>
-    <InformationalVersion>$(Version)+$(SourceRevisionId)</InformationalVersion>
-  </PropertyGroup>
+
 
 </Project>

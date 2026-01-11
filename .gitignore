@@ -21,3 +21,5 @@ crash.log
 # Temp
 **/internal_notes/
 *.tmp
+
+dist/

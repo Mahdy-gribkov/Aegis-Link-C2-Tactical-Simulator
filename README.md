@@ -106,9 +106,27 @@ netstat -an | findstr 5555
 New-NetFirewallRule -DisplayName "AegisLink UDP" -Direction Inbound -Protocol UDP -LocalPort 5555 -Action Allow
 ```
 
+### v3.0.0 Feature Highlights
+- **Radar Navigation**: Zoom (Mouse Wheel) and Pan (Click & Drag) the tactical map.
+- **Persistence**: Monitors window position, size, and screen placement across restarts.
+- **Clipboard Integration**: `Ctrl+C` copies terminal logs, `Ctrl+V` pastes commands.
+- **Performance**: High-FPS radar render loop optimized for 60Hz.
+
+### Build & Release
+**Automated Build Script:**
+```powershell
+.\build_release.ps1 -Version "3.0.0"
+```
+*Creates a self-contained single-file executable in `dist/`.*
+
+**Manual Build:**
+```powershell
+dotnet build AegisLink.sln -c Release
+```
+
 ### Application Won't Start
 1. Check `%LOCALAPPDATA%\AegisLink\logs\crash.log`
-2. Ensure .NET 6.0 is installed (or use self-contained build)
+2. Run `.\build_release.ps1` to ensure a clean build environment
 
 ---
 
