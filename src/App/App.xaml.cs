@@ -1,6 +1,7 @@
 ﻿using AegisLink.App.Services;
 using AegisLink.App.ViewModels;
 using AegisLink.App.Views;
+using AegisLink.Core;
 using Microsoft.Extensions.DependencyInjection;
 using System.IO;
 using System.Windows;
@@ -41,6 +42,7 @@ public partial class App : Application
         services.AddSingleton<IConfigService, ConfigService>();
         services.AddSingleton<ISoundService, SoundService>();
         services.AddSingleton<IScenarioService, ScenarioService>();
+        services.AddSingleton<IDataLink, UdpLinkService>();
 
         // ViewModels (Transient)
         services.AddTransient<ShellViewModel>();

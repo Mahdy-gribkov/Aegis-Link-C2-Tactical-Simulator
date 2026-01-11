@@ -1,5 +1,6 @@
 using AegisLink.App.Models;
 using AegisLink.App.Services;
+using AegisLink.Core;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
@@ -47,7 +48,7 @@ public partial class ShellViewModel : ObservableObject
     private int _packetCount = 0;
     private readonly DispatcherTimer _fpsTimer;
 
-    public ShellViewModel(ILogger logger, IConfigService configService, ISoundService soundService, IScenarioService scenarioService)
+    public ShellViewModel(ILogger logger, IConfigService configService, ISoundService soundService, IScenarioService scenarioService, IDataLink dataLink)
     {
         _logger = logger;
         _configService = configService;
@@ -55,6 +56,7 @@ public partial class ShellViewModel : ObservableObject
         _scenarioService = scenarioService;
 
         _scenarioService.OnEventGenerated += OnTacticalEvent;
+        dataLink.OnFrameReceived += OnUdpFrame;
 
         // Mission Clock
         _clockTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
@@ -115,6 +117,27 @@ public partial class ShellViewModel : ObservableObject
                 _soundService.PlayChirp();
                 ShowToast("📡 Burst Detected");
             }
+
+            UpdateSignalGraph();
+        });
+    }
+
+    private void OnUdpFrame(TelemetryFrame frame)
+    {
+        _lastPacketTime = DateTime.Now;
+        _packetCount++;
+
+        Application.Current.Dispatcher.InvokeAsync(() =>
+        {
+            BatteryLevel = frame.BatteryLevel;
+            SignalStrength = frame.SignalStrength;
+            Azimuth = frame.Latitude;
+            Distance = frame.Longitude;
+            
+            CurrentState = ApplicationState.Tracking;
+            ConnectionStatus = "◉ LIVE LINK";
+            IsSignalLost = false;
+            IsLinkEstablished = true;
 
             UpdateSignalGraph();
         });
