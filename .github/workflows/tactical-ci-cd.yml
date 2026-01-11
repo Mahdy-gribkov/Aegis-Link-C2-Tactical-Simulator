@@ -98,47 +98,48 @@ jobs:
       - name: Publish Tactical Release
         run: dotnet publish src/App/AegisLink.App.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:IncludeAllContentForSelfExtract=true -p:DebugType=None -p:DebugSymbols=false -p:Version=${{ env.VERSION }} -o ./publish
 
+      - name: Package Release Artifact
+        run: |
+          Compress-Archive -Path ./publish/* -DestinationPath ./AegisLink-v${{ env.VERSION }}-win-x64.zip
+
       - name: Compute SHA-256 Hash
         run: |
-          $hash = (Get-FileHash -Path ./publish/AegisLink.App.exe -Algorithm SHA256).Hash
+          $hash = (Get-FileHash -Path ./AegisLink-v${{ env.VERSION }}-win-x64.zip -Algorithm SHA256).Hash
           echo "SHA256=$hash" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
       
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          files: ./publish/AegisLink.App.exe
+          files: |
+             ./publish/AegisLink.App.exe
+             ./AegisLink-v${{ env.VERSION }}-win-x64.zip
           generate_release_notes: true
           body: |
-            ### 🛡️ AEGIS PUBLIC RELEASE v${{ env.VERSION }}
+            ### 🛡️ AEGIS PUBLIC RELEASE v${{ env.VERSION }} [FLAGSHIP]
             
             **Classification:** UNCLASSIFIED // PUBLIC RELEASE
-            **Codename:** PHOENIX
-            **Platform:** Windows x64 (Self-Contained, Trimmed, R2R)
+            **Codename:** AEGIS-v3
+            **Platform:** Windows x64 (Self-Contained)
             **Build Date:** ${{ github.event.head_commit.timestamp }}
             
             ---
             
+            #### 🚀 What's New in v3.0.0
+            - **Radar Navigation**: Full Zoom (Mouse Wheel) and Pan (Click & Drag) support.
+            - **Persistence Engine**: App remembers window position, size, and monitor placement.
+            - **Clipboard Sync**: `Ctrl+C` to copy terminal history, `Ctrl+V` to paste commands.
+            - **Performance**: High-FPS radar render loop optimized for 60Hz.
+            - **Architectural Refresh**: Cleaned mission logic and removed legacy persistence layers.
+            
             #### Integrity Verification
             ```
-            SHA-256: ${{ env.SHA256 }}
+            SHA-256 (ZIP): ${{ env.SHA256 }}
             ```
             
             #### Installation
-            1. Download `AegisLink.App.exe`
-            2. Run directly (no extraction required)
-            3. Press [~] to open terminal, [F11] for fullscreen
-            
-            #### Security Features
-            - Rate Limiting: 50 packets/sec per source
-            - Replay Protection: Sequence ID validation
-            - Endpoint Locking: XOR challenge-response
-            
-            #### What's New in Phoenix
-            - Modular view architecture (Dashboard/Radar)
-            - Active simulation with spinning radar blip
-            - Keyboard shortcuts (F11, ~, Ctrl+S, ESC)
-            - Command history and input validation
-            - Trimmed & ReadyToRun for faster startup
+            1. Download `AegisLink-v${{ env.VERSION }}-win-x64.zip`
+            2. Extract or run `AegisLink.App.exe` directly.
+            3. Press [~] to open terminal, [F11] for fullscreen.
             
             ---
             *Lead Systems Architect: Mahdy Gribkov*
