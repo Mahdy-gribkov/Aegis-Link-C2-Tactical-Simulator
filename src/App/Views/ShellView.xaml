@@ -29,7 +29,7 @@
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock Text="◢ AEGIS-LINK C2" FontSize="16" FontWeight="Bold" 
                                    Foreground="{DynamicResource CyberCyan}" FontFamily="{StaticResource MonoFont}"/>
-                        <TextBlock Text=" | v3.1.0" FontSize="12" Foreground="{DynamicResource TextMuted}" 
+                        <TextBlock Text=" | v3.1.1" FontSize="12" Foreground="{DynamicResource TextMuted}" 
                                    Margin="10,0,0,0" VerticalAlignment="Center"/>
                         <TextBlock Text=" | " Foreground="#333333" Margin="10,0"/>
                         <TextBlock Text="{Binding MissionClock, Mode=OneWay}" FontSize="12" Foreground="{DynamicResource AlertAmber}" 
@@ -102,9 +102,13 @@
                             </Viewport3D.Camera>
                         </Viewport3D>
                         
-                        <Canvas x:Name="RadarCanvas" Background="Transparent" ClipToBounds="True" RenderTransformOrigin="0.5,0.5">
+                        <Canvas x:Name="RadarCanvas" Background="Transparent" ClipToBounds="True" RenderTransformOrigin="0.5,0.5"
+                                RenderOptions.BitmapScalingMode="LowQuality"
+                                MouseWheel="RadarCanvas_MouseWheel" MouseMove="RadarCanvas_MouseMove"
+                                MouseLeftButtonDown="RadarCanvas_MouseLeftButtonDown" MouseLeftButtonUp="RadarCanvas_MouseLeftButtonUp">
                             <Canvas.RenderTransform>
                                 <TransformGroup>
+                                    <MatrixTransform x:Name="RadarTransform"/>
                                     <ScaleTransform ScaleX="1" ScaleY="0.8"/>
                                     <SkewTransform AngleX="0" AngleY="-5"/>
                                 </TransformGroup>
@@ -223,13 +227,8 @@
                                 Style="{StaticResource CyberButton}" Width="140" Margin="0,0,10,0"/>
                         <Button Content="⌫ CLEAR LOG" Command="{Binding ClearLogCommand}" 
                                 Style="{StaticResource CyberButton}" Width="120" Margin="0,0,10,0"/>
-                        <Button Content="{Binding IsMuted, Converter={StaticResource BoolToVisibility}, ConverterParameter='🔇 MUTED|🔊 AUDIO', Mode=OneWay}" 
-                                Command="{Binding ToggleMuteCommand}" 
-                                Style="{StaticResource CyberButton}" Width="100">
-                            <Button.Content>
-                                <TextBlock Text="🔊 AUDIO" FontFamily="{StaticResource MonoFont}"/>
-                            </Button.Content>
-                        </Button>
+                        <Button Content="🔊 AUDIO" Command="{Binding ToggleMuteCommand}" 
+                                Style="{StaticResource CyberButton}" Width="100"/>
                     </StackPanel>
                 </Grid>
             </Border>

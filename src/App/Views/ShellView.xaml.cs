@@ -1,6 +1,9 @@
+using AegisLink.App.Models;
+using AegisLink.App.Services;
 using AegisLink.App.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -13,22 +16,65 @@ namespace AegisLink.App.Views;
 public partial class ShellView : Window
 {
     private readonly ShellViewModel _vm;
+    private readonly IConfigService _configService;
     private readonly List<string> _commandHistory = new();
     private int _historyIndex = -1;
+    
+    // Radar zoom/pan state
+    private double _zoomLevel = 1.0;
+    private Point _panOffset = new(0, 0);
+    private Point _lastMousePos;
+    private bool _isPanning = false;
 
-    public ShellView(ShellViewModel viewModel)
+    public ShellView(ShellViewModel viewModel, IConfigService configService)
     {
         InitializeComponent();
         _vm = viewModel;
+        _configService = configService;
         DataContext = _vm;
 
         Loaded += ShellView_Loaded;
         SizeChanged += ShellView_SizeChanged;
+        Closing += ShellView_Closing;
     }
 
     private void ShellView_Loaded(object sender, RoutedEventArgs e)
     {
+        RestoreWindowPosition();
         DrawRadarGrid();
+    }
+
+    private void ShellView_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
+    {
+        SaveWindowPosition();
+    }
+
+    private void RestoreWindowPosition()
+    {
+        var config = _configService.Load();
+        var bounds = config.LastWindowBounds;
+        
+        // Validate bounds are on-screen
+        if (bounds.Width > 100 && bounds.Height > 100)
+        {
+            Left = bounds.X;
+            Top = bounds.Y;
+            Width = bounds.Width;
+            Height = bounds.Height;
+        }
+    }
+
+    private void SaveWindowPosition()
+    {
+        var config = _configService.Load();
+        config.LastWindowBounds = new WindowBounds
+        {
+            X = Left,
+            Y = Top,
+            Width = Width,
+            Height = Height
+        };
+        _configService.Save(config);
     }
 
     private void ShellView_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -106,6 +152,22 @@ public partial class ShellView : Window
 
     private void Window_KeyDown(object sender, KeyEventArgs e)
     {
+        // Handle Ctrl+C/V for clipboard
+        if (Keyboard.Modifiers == ModifierKeys.Control)
+        {
+            if (e.Key == Key.C)
+            {
+                CopyTerminalLogs();
+                e.Handled = true;
+                return;
+            }
+            if (e.Key == Key.V && CommandInput.IsFocused)
+            {
+                // Default paste behavior already handled by TextBox
+                return;
+            }
+        }
+
         switch (e.Key)
         {
             case Key.F11:
@@ -123,6 +185,58 @@ public partial class ShellView : Window
                     _vm.ToggleTerminalCommand.Execute(null);
                 break;
         }
+    }
+
+    private void CopyTerminalLogs()
+    {
+        if (_vm.TerminalLog.Count > 0)
+        {
+            var lastLogs = string.Join(Environment.NewLine, _vm.TerminalLog.TakeLast(10));
+            Clipboard.SetText(lastLogs);
+            _vm.ShowToast("📋 Logs copied");
+        }
+    }
+
+    // Radar Zoom/Pan Handlers
+    private void RadarCanvas_MouseWheel(object sender, MouseWheelEventArgs e)
+    {
+        var zoomDelta = e.Delta > 0 ? 1.1 : 0.9;
+        _zoomLevel = Math.Clamp(_zoomLevel * zoomDelta, 0.5, 4.0);
+        UpdateRadarTransform();
+    }
+
+    private void RadarCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        _isPanning = true;
+        _lastMousePos = e.GetPosition(this);
+        RadarCanvas.CaptureMouse();
+    }
+
+    private void RadarCanvas_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        _isPanning = false;
+        RadarCanvas.ReleaseMouseCapture();
+    }
+
+    private void RadarCanvas_MouseMove(object sender, MouseEventArgs e)
+    {
+        if (_isPanning)
+        {
+            var pos = e.GetPosition(this);
+            var delta = pos - _lastMousePos;
+            _panOffset.X += delta.X;
+            _panOffset.Y += delta.Y;
+            _lastMousePos = pos;
+            UpdateRadarTransform();
+        }
+    }
+
+    private void UpdateRadarTransform()
+    {
+        var matrix = new Matrix();
+        matrix.Translate(_panOffset.X, _panOffset.Y);
+        matrix.ScaleAt(_zoomLevel, _zoomLevel, RadarCanvas.ActualWidth / 2, RadarCanvas.ActualHeight / 2);
+        RadarTransform.Matrix = matrix;
     }
 
     private void CommandInput_KeyDown(object sender, KeyEventArgs e)
