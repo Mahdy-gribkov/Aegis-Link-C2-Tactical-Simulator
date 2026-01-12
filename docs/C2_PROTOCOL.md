@@ -5,23 +5,25 @@
 ## Overview
 To minimize latency and simulate real-world low-bandwidth tactical radio links, Aegis-Link v3.0 uses a 6-byte bit-packed binary protocol.
 
-## Protocol Layout (6 Bytes)
+## Protocol Layout (7 Bytes)
 
 | Byte | Field | Type | Scale/Mask |
 |------|-------|------|------------|
-| 0-1 | **Azimuth** | `Int16` | 1:100 (short = float * 100) |
-| 2-3 | **Elevation** | `Int16` | 1:100 (short = float * 100) |
-| 4 | **Status Flags** | `Byte` | Bit 0: ARMED, Bit 1: LOCKED |
-| 5 | **Battery** | `Byte` | 0-100 (Unsigned Byte) |
+| 0 | **Version** | `Byte` | 0x01 (SSOT) |
+| 1-2 | **Azimuth** | `Int16` | 1:100 (short = float * 100) |
+| 3-4 | **Elevation** | `Int16` | 1:100 (short = float * 100) |
+| 5 | **Status Flags** | `Byte` | Bit 0: ARMED, Bit 1: LOCKED |
+| 6 | **Battery** | `Byte` | 0-100 (Unsigned Byte) |
 
 ## Binary Mapping
 ```
-[AA][AA] [EE][EE] [SS] [BB]
- |  |     |  |     |    |
- |  |     |  |     |    +-- Battery (0-100)
- |  |     |  |     +------- Flags (000000LS)
- |  |     +--+------------- Elevation (Little Endian)
- +--+---------------------- Azimuth (Little Endian)
+[VV] [AA][AA] [EE][EE] [SS] [BB]
+ |    |  |     |  |     |    |
+ |    |  |     |  |     |    +-- Battery (0-100)
+ |    |  |     |  |     +------- Flags (000000LS)
+ |    |  |     +--+------------- Elevation (Little Endian)
+ |    +--+---------------------- Azimuth (Little Endian)
+ +------------------------------ Protocol Version
 ```
 
 ## Security Handshake

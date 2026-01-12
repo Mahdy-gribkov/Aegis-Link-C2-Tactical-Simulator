@@ -7,7 +7,8 @@ namespace AegisLink.Core
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public readonly struct TelemetryFrame
     {
-        // 6-byte bit-packed protocol for low-bandwidth tactical links
+        // 7-byte bit-packed protocol for low-bandwidth tactical links
+        public readonly byte Version;          // Protocol version (SSOT)
         public readonly short AzimuthScaled;   // float * 100
         public readonly short ElevationScaled; // float * 100
         public readonly byte StatusFlags;      // Bit 0: Armed, Bit 1: Locked
@@ -15,6 +16,7 @@ namespace AegisLink.Core
 
         public TelemetryFrame(float azimuth, float elevation, bool isArmed, bool isLocked, byte battery)
         {
+            Version = TacticalConstants.PROTOCOL_VERSION;
             AzimuthScaled = (short)(azimuth * 100);
             ElevationScaled = (short)(elevation * 100);
             StatusFlags = (byte)((isArmed ? 0x01 : 0x00) | (isLocked ? 0x02 : 0x00));

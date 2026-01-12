@@ -11,22 +11,25 @@ namespace AegisLink.Tests
         public void FromBytes_ShouldMapCorrectly_WhenValidDataProvided()
         {
             // Arrange
+            byte version = TacticalConstants.PROTOCOL_VERSION;
             short az = 12345;
             short el = 6789;
             byte flags = 0x01;
             byte battery = 90;
 
-            // Build byte array (6 bytes)
-            byte[] rawData = new byte[6];
-            Buffer.BlockCopy(BitConverter.GetBytes(az), 0, rawData, 0, 2);
-            Buffer.BlockCopy(BitConverter.GetBytes(el), 0, rawData, 2, 2);
-            rawData[4] = flags;
-            rawData[5] = battery;
+            // Build byte array (7 bytes)
+            byte[] rawData = new byte[7];
+            rawData[0] = version;
+            Buffer.BlockCopy(BitConverter.GetBytes(az), 0, rawData, 1, 2);
+            Buffer.BlockCopy(BitConverter.GetBytes(el), 0, rawData, 3, 2);
+            rawData[5] = flags;
+            rawData[6] = battery;
 
             // Act
             TelemetryFrame frame = ProtocolMapper.FromBytes(rawData);
 
             // Assert
+            Assert.Equal(version, frame.Version);
             Assert.Equal(az, frame.AzimuthScaled);
             Assert.Equal(el, frame.ElevationScaled);
             Assert.Equal(flags, frame.StatusFlags);
@@ -35,10 +38,10 @@ namespace AegisLink.Tests
         }
 
         [Fact]
-        public void StructSize_ShouldBeExactly6Bytes()
+        public void StructSize_ShouldBeExactly7Bytes()
         {
             // Assert
-            Assert.Equal(6, Marshal.SizeOf<TelemetryFrame>());
+            Assert.Equal(7, Marshal.SizeOf<TelemetryFrame>());
         }
     }
 }

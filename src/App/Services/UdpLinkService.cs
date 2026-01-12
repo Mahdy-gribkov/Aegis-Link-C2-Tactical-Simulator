@@ -32,13 +32,24 @@ namespace AegisLink.App.Services
 
         public event Action<TelemetryFrame>? OnFrameReceived;
 
-        public UdpLinkService()
+        public UdpLinkService(ILogger logger)
         {
-            _udpClient = new UdpClient(TacticalConstants.DEFAULT_PORT);
-            _cts = new CancellationTokenSource();
-            
-            // Start listening on a background thread immediately
-            _listenerTask = Task.Run(ListenerLoopAsync, _cts.Token);
+            try
+            {
+                _udpClient = new UdpClient(TacticalConstants.DEFAULT_PORT);
+                _cts = new CancellationTokenSource();
+                
+                // Start listening on a background thread
+                _listenerTask = Task.Run(ListenerLoopAsync, _cts.Token);
+                logger.Info($"[RADIO] Listener active on Port {TacticalConstants.DEFAULT_PORT}");
+            }
+            catch (Exception ex)
+            {
+                logger.Error("[RADIO] Hardware radio initialization failed. Interface may be unavailable.", ex);
+                // We keep _udpClient null or handled - the loop won't start
+                _listenerTask = Task.CompletedTask;
+                _cts = new CancellationTokenSource();
+            }
         }
 
         private async Task ListenerLoopAsync()
@@ -154,6 +165,13 @@ namespace AegisLink.App.Services
             }
 
             TelemetryFrame frame = ProtocolMapper.FromBytes(payload);
+
+            // [SSOT] Version Validation
+            if (frame.Version != TacticalConstants.PROTOCOL_VERSION)
+            {
+                Debug.WriteLine($"[PROTOCOL_ERROR] Version Mismatch. Expected {TacticalConstants.PROTOCOL_VERSION}, Got {frame.Version}");
+                return;
+            }
 
             OnFrameReceived?.Invoke(frame);
         }
