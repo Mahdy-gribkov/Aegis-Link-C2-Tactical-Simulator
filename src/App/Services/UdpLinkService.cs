@@ -155,14 +155,6 @@ namespace AegisLink.App.Services
 
             TelemetryFrame frame = ProtocolMapper.FromBytes(payload);
 
-            // SECURITY: Replay Protection - check sequence
-            if (frame.StatusCodes <= _lastSequenceId && _lastSequenceId != 0)
-            {
-                Debug.WriteLine($"[SECURITY_WARNING] Replay attack detected - SeqID {frame.StatusCodes} <= {_lastSequenceId}");
-                return;
-            }
-            _lastSequenceId = frame.StatusCodes;
-
             OnFrameReceived?.Invoke(frame);
         }
 

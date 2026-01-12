@@ -223,12 +223,14 @@
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
                         <Button Content="◉ INITIATE SCAN" Command="{Binding InitiateScanCommand}" 
                                 Style="{StaticResource CyberButton}" Width="140" Margin="0,0,10,0"/>
-                        <Button Content="◢ CAPTURE FRAME" Command="{Binding CapturePacketCommand}" 
-                                Style="{StaticResource CyberButton}" Width="140" Margin="0,0,10,0"/>
-                        <Button Content="⌫ CLEAR LOG" Command="{Binding ClearLogCommand}" 
+                        <Button Style="{StaticResource FireButton}" Command="{Binding FireMissionCommand}"
+                                Width="140" Margin="0,-5,10,-5" FontSize="12" FontWeight="Bold"/>
+                        <Button Content="◣ ARM SYSTEM" Command="{Binding ToggleArmamentCommand}" 
                                 Style="{StaticResource CyberButton}" Width="120" Margin="0,0,10,0"/>
+                        <Button Content="⌫ CLEAR LOG" Command="{Binding ClearLogCommand}" 
+                                Style="{StaticResource CyberButton}" Width="100" Margin="0,0,10,0"/>
                         <Button Content="🔊 AUDIO" Command="{Binding ToggleMuteCommand}" 
-                                Style="{StaticResource CyberButton}" Width="100"/>
+                                Style="{StaticResource CyberButton}" Width="80"/>
                     </StackPanel>
                 </Grid>
             </Border>

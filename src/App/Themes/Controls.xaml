@@ -44,6 +44,26 @@
         <Setter Property="BorderBrush" Value="{DynamicResource AlertRed}"/>
     </Style>
 
+    <!-- Fire Button with Safety Cover -->
+    <Style x:Key="FireButton" TargetType="Button" BasedOn="{StaticResource CyberButton}">
+        <Setter Property="Background" Value="#1A1111"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextMuted}"/>
+        <Setter Property="BorderBrush" Value="#444"/>
+        <Setter Property="Content" Value="☢ FIRE MISSION"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding IsArmed}" Value="True">
+                <Setter Property="Foreground" Value="{DynamicResource AlertRed}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource AlertRed}"/>
+                <Setter Property="Background" Value="#33FF0000"/>
+                <Setter Property="Effect">
+                    <Setter.Value>
+                        <DropShadowEffect Color="Red" BlurRadius="15" ShadowDepth="0"/>
+                    </Setter.Value>
+                </Setter>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
     <!-- Terminal TextBox Style -->
     <Style x:Key="TerminalInput" TargetType="TextBox">
         <Setter Property="Background" Value="Transparent"/>

@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Reflection;
 using System.Windows;
+using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Threading;
 
@@ -20,6 +21,7 @@ public partial class ShellViewModel : ObservableObject
     private readonly IScenarioService _scenarioService;
     private readonly DispatcherTimer _watchdogTimer;
     private DateTime _lastPacketTime = DateTime.Now;
+    private readonly object _logLock = new(); // Thread-safety lock for terminal logs
 
     // Observable Properties (CommunityToolkit source-generated)
     [ObservableProperty] private ApplicationState _currentState = ApplicationState.Idle;
@@ -36,6 +38,9 @@ public partial class ShellViewModel : ObservableObject
     [ObservableProperty] private bool _isSignalLost = true;
     [ObservableProperty] private bool _isLinkEstablished = false;
     [ObservableProperty] private bool _isMuted = false;
+    [ObservableProperty] private bool _isArmed = false;
+    [ObservableProperty] private bool _isLocked = false;
+
 
     public string BuildVersion => Assembly.GetExecutingAssembly()
         .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "3.0.0";
@@ -73,8 +78,12 @@ public partial class ShellViewModel : ObservableObject
         _fpsTimer.Tick += (s, e) => { PacketsPerSecond = _packetCount; _packetCount = 0; };
         _fpsTimer.Start();
 
+        // [SENIOR] Enable multi-threaded access to UI collection
+        BindingOperations.EnableCollectionSynchronization(TerminalLog, _logLock);
+
         _logger.Info("[SYSTEM] Aegis-Link v3.0.0 Initialized");
         _logger.Info($"[BUILD] {BuildVersion}");
+        AddTerminalEntry("[SYSTEM] Version 3.0 Flagship Mode Active");
         AddTerminalEntry("[SYSTEM] Type 'help' for commands. Press ~ to toggle terminal.");
     }
 
@@ -119,6 +128,7 @@ public partial class ShellViewModel : ObservableObject
             }
 
             UpdateSignalGraph();
+            LogToAar($"[TRACK] AZ:{Azimuth:F2} SIG:{_signalStrength:F2}");
         });
     }
 
@@ -130,16 +140,20 @@ public partial class ShellViewModel : ObservableObject
         Application.Current.Dispatcher.InvokeAsync(() =>
         {
             BatteryLevel = frame.BatteryLevel;
-            SignalStrength = frame.SignalStrength;
-            Azimuth = frame.Latitude;
-            Distance = frame.Longitude;
+            // SignalStrength is no longer in the 5-byte protocol per Master Plan
+            Azimuth = frame.Azimuth;
+            Distance = frame.Elevation;
             
+            IsArmed = frame.IsArmed;
+            IsLocked = frame.IsLocked;
+
             CurrentState = ApplicationState.Tracking;
-            ConnectionStatus = "◉ LIVE LINK";
+            ConnectionStatus = LaunchValidator.GetSafetyReport(frame);
             IsSignalLost = false;
             IsLinkEstablished = true;
 
             UpdateSignalGraph();
+            LogToAar($"[LINK] {ConnectionStatus} AZ:{Azimuth:F2} EL:{Distance:F2} Bat:{BatteryLevel}%");
         });
     }
 
@@ -148,7 +162,7 @@ public partial class ShellViewModel : ObservableObject
         const int MaxPoints = 100;
         const double GraphHeight = 70;
         
-        double y = GraphHeight - ((SignalStrength + 80) / 80.0 * GraphHeight);
+        double y = GraphHeight - ((_signalStrength + 80) / 80.0 * GraphHeight);
         y = Math.Clamp(y, 0, GraphHeight);
 
         var newPoints = new PointCollection();
@@ -181,6 +195,35 @@ public partial class ShellViewModel : ObservableObject
             _logger.Info("[SCAN] Started on simulated channel");
             ShowToast("Scan Active");
         }
+    }
+
+    [RelayCommand]
+    private void FireMission()
+    {
+        if (IsArmed && IsLocked)
+        {
+            _logger.Info("[FIRE] Strategic Mission Initiated");
+            AddTerminalEntry("[FIRE] CRIT: LAUNCH SIGNAL SENT");
+            LogToAar("[CRIT] LAUNCH COMMAND EXECUTED");
+            _soundService.PlayAlert();
+            ShowToast("🚀 MISSILE AWAY");
+        }
+        else
+        {
+            _logger.Info("[FIRE] Safety Interlock Failure");
+            AddTerminalEntry("[WARN] Safety Interlock Active: System Unarmed/No Lock");
+            _soundService.PlayClick();
+            ShowToast("⚠ LAUNCH ABORTED");
+        }
+    }
+
+    [RelayCommand]
+    private void ToggleArmament()
+    {
+        IsArmed = !IsArmed;
+        _logger.Info($"[SYSTEM] Armament State: {(IsArmed ? "ARMED" : "SAFE")}");
+        AddTerminalEntry($"[SYSTEM] Armament: {(IsArmed ? "ARMED" : "SAFE")}");
+        _soundService.PlayClick();
     }
 
     [RelayCommand]
@@ -267,8 +310,12 @@ public partial class ShellViewModel : ObservableObject
 
     public void AddTerminalEntry(string entry)
     {
-        TerminalLog.Add($"[{DateTime.Now:HH:mm:ss}] {entry}");
-        if (TerminalLog.Count > 200) TerminalLog.RemoveAt(0);
+        // [SENIOR] Direct addition to collection from any thread via synchronized lock
+        lock (_logLock)
+        {
+            TerminalLog.Add($"[{DateTime.Now:HH:mm:ss}] {entry}");
+            if (TerminalLog.Count > 200) TerminalLog.RemoveAt(0);
+        }
     }
 
     public void ShowToast(string message)
@@ -277,5 +324,17 @@ public partial class ShellViewModel : ObservableObject
         var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
         timer.Tick += (s, e) => { if (ToastQueue.Count > 0) ToastQueue.RemoveAt(0); timer.Stop(); };
         timer.Start();
+    }
+
+    private void LogToAar(string entry)
+    {
+        try
+        {
+            var appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            var aarPath = Path.Combine(appData, "AegisLink", "logs", "AAR_LOG.txt");
+            Directory.CreateDirectory(Path.GetDirectoryName(aarPath)!);
+            File.AppendAllTextAsync(aarPath, $"[{DateTime.Now:O}] {entry}\n");
+        }
+        catch { /* Fallback to standard logger if disk is full/locked */ }
     }
 }

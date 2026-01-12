@@ -11,36 +11,34 @@ namespace AegisLink.Tests
         public void FromBytes_ShouldMapCorrectly_WhenValidDataProvided()
         {
             // Arrange
-            int battery = 75;
-            float signal = -50.0f;
-            double lat = 12.34;
-            double lon = 56.78;
-            uint status = 1u;
+            short az = 12345;
+            short el = 6789;
+            byte flags = 0x01;
+            byte battery = 90;
 
-            // Build byte array dynamically to match system endianness
-            byte[] rawData = new byte[28];
-            Buffer.BlockCopy(BitConverter.GetBytes(battery), 0, rawData, 0, 4);
-            Buffer.BlockCopy(BitConverter.GetBytes(signal), 0, rawData, 4, 4);
-            Buffer.BlockCopy(BitConverter.GetBytes(lat), 0, rawData, 8, 8);
-            Buffer.BlockCopy(BitConverter.GetBytes(lon), 0, rawData, 16, 8);
-            Buffer.BlockCopy(BitConverter.GetBytes(status), 0, rawData, 24, 4);
+            // Build byte array (6 bytes)
+            byte[] rawData = new byte[6];
+            Buffer.BlockCopy(BitConverter.GetBytes(az), 0, rawData, 0, 2);
+            Buffer.BlockCopy(BitConverter.GetBytes(el), 0, rawData, 2, 2);
+            rawData[4] = flags;
+            rawData[5] = battery;
 
             // Act
             TelemetryFrame frame = ProtocolMapper.FromBytes(rawData);
 
             // Assert
+            Assert.Equal(az, frame.AzimuthScaled);
+            Assert.Equal(el, frame.ElevationScaled);
+            Assert.Equal(flags, frame.StatusFlags);
             Assert.Equal(battery, frame.BatteryLevel);
-            Assert.Equal(signal, frame.SignalStrength, 2); // Use 2 decimal places precision
-            Assert.Equal(lat, frame.Latitude, 2);
-            Assert.Equal(lon, frame.Longitude, 2);
-            Assert.Equal(status, frame.StatusCodes);
+            Assert.Equal(123.45f, frame.Azimuth, 2);
         }
 
         [Fact]
-        public void StructSize_ShouldBeExactly28Bytes()
+        public void StructSize_ShouldBeExactly6Bytes()
         {
             // Assert
-            Assert.Equal(28, Marshal.SizeOf<TelemetryFrame>());
+            Assert.Equal(6, Marshal.SizeOf<TelemetryFrame>());
         }
     }
 }
