@@ -40,6 +40,8 @@ public partial class ShellViewModel : ObservableObject
     [ObservableProperty] private bool _isMuted = false;
     [ObservableProperty] private bool _isArmed = false;
     [ObservableProperty] private bool _isLocked = false;
+    [ObservableProperty] private bool _isConnecting = false;
+
 
 
     public string BuildVersion => Assembly.GetExecutingAssembly()
@@ -68,8 +70,8 @@ public partial class ShellViewModel : ObservableObject
         _clockTimer.Tick += (s, e) => MissionClock = (DateTime.Now - _startTime).ToString(@"hh\:mm\:ss");
         _clockTimer.Start();
 
-        // Watchdog (5 second timeout)
-        _watchdogTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        // Watchdog (1.5 second timeout per Master Plan)
+        _watchdogTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
         _watchdogTimer.Tick += Watchdog_Tick;
         _watchdogTimer.Start();
 
@@ -91,20 +93,22 @@ public partial class ShellViewModel : ObservableObject
     {
         var secondsSincePacket = (DateTime.Now - _lastPacketTime).TotalSeconds;
         
-        if (CurrentState == ApplicationState.Tracking && secondsSincePacket > 5)
+        if (CurrentState == ApplicationState.Tracking && secondsSincePacket > 1.5)
         {
             CurrentState = ApplicationState.Offline;
             ConnectionStatus = "LOST LINK";
             IsSignalLost = true;
             IsLinkEstablished = false;
+            IsConnecting = false;
             _soundService.PlayAlert();
-            _logger.Info("[ALERT] Signal lost - no packets for 5 seconds");
+            _logger.Info("[ALERT] Signal lost - timeout exceeded (1.5s)");
             ShowToast("⚠ SIGNAL LOST");
         }
-        else if (CurrentState == ApplicationState.Idle && secondsSincePacket > 5)
+        else if (CurrentState == ApplicationState.Idle && secondsSincePacket > 1.5)
         {
             IsSignalLost = true;
             IsLinkEstablished = false;
+            IsConnecting = false;
         }
     }
 
