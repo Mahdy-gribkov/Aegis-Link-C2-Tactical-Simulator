@@ -9,10 +9,6 @@
    ╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝╚══════╝    ╚══════╝╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝
                     TACTICAL C2 CONSOLE | v3.0.0
 ```
-
-**Classification:** UNCLASSIFIED // PUBLIC RELEASE  
-**Lead Systems Architect:** Mahdy Gribkov
-
 ---
 
 ## Getting Started
@@ -95,17 +91,6 @@ graph TB
 
 ---
 
-## Troubleshooting
-
-### UDP Port Blocked
-```powershell
-# Check if port 5555 is in use
-netstat -an | findstr 5555
-
-# Open Windows Firewall
-New-NetFirewallRule -DisplayName "AegisLink UDP" -Direction Inbound -Protocol UDP -LocalPort 5555 -Action Allow
-```
-
 ### v3.0.0 Feature Highlights
 - **Radar Navigation**: Zoom (Mouse Wheel) and Pan (Click & Drag) the tactical map.
 - **Persistence**: Monitors window position, size, and screen placement across restarts.
@@ -123,24 +108,6 @@ New-NetFirewallRule -DisplayName "AegisLink UDP" -Direction Inbound -Protocol UD
 ```powershell
 dotnet build AegisLink.sln -c Release
 ```
-
-### Application Won't Start
-1. Check `%LOCALAPPDATA%\AegisLink\logs\crash.log`
-2. Run `.\build_release.ps1` to ensure a clean build environment
-
----
-
-## Version History
-
-| Version | Status | Description |
-|---------|--------|-------------|
-| **3.0.0** | **CURRENT** | Flagship refactor: DI, CommunityToolkit.Mvvm, Glass Cockpit |
-| 2.1.0 | Stable | Active radar/graph animation |
-| 2.0.2 | Stable | XAML event compatibility fix |
-| 1.6.0 | Superseded | Flagship UI overhaul |
-
----
-
 ## License
 
 MIT License. See [LICENSE](LICENSE) for details.
