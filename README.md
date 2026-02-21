@@ -1,3 +1,18 @@
+<div align="center">
+
+# Aegis-Link C2 Tactical Simulator
+
+C2 Tactical Simulator built with .NET 6 WPF, featuring hardware integration with M5Stack CardPuter (ESP32-S3).
+
+![C#](https://img.shields.io/badge/C%23-239120?style=for-the-badge&logo=csharp&logoColor=white)
+![.NET 6](https://img.shields.io/badge/.NET_6-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
+![WPF](https://img.shields.io/badge/WPF-0078D4?style=for-the-badge&logo=windows&logoColor=white)
+![ESP32](https://img.shields.io/badge/ESP32--S3-E7352C?style=for-the-badge&logo=espressif&logoColor=white)
+
+</div>
+
+---
+
 # Aegis-Link C2 v3.0.0
 
 ```
